@@ -1,43 +1,70 @@
-# Astro Starter Kit: Minimal
+# Little Y Storybook
 
-```sh
-npm create astro@latest -- --template minimal
+아이에게 읽어주기 좋은 이야기를 **연령/길이/태그 기준으로 탐색**하고 읽을 수 있는 모바일 웹 스토리북입니다.
+정적 콘텐츠(Markdown)로 운영하며, 버전별(연령/길이) 이야기를 독립적으로 노출합니다.
+
+## 핵심 기능
+- 연령/길이/태그 필터 + 키워드 검색
+- 이야기 상세 → 읽기 화면
+- 연작(Series) 회차 이동 및 이어보기
+- 글자 크기 조절, 진행 표시
+- SEO 기본 메타, 접근성 포커스 스타일
+
+## 기술 스택
+- **Astro** (정적 빌드)
+- **Markdown + frontmatter** (콘텐츠)
+- **Vanilla CSS**
+- **Vitest** (간단 테스트)
+
+## 콘텐츠 구조
+- 버전 1개 = 파일 1개
+- 경로: `content/versions/*.md`
+
+예시:
+```md
+---
+id: ver_010_a
+title: 별을 찾는 아이
+summary: 사라진 별을 찾아 떠나는 아이의 이야기
+age_range: 8-9
+length_type: series
+estimated_read_time: 10
+tags: [상상, 감동, 창작]
+---
+### 1화
+- estimated_read_time: 5
+본문...
+
+### 2화
+- estimated_read_time: 5
+본문...
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+## 로컬 실행
+```bash
+npm install
+ASTRO_TELEMETRY_DISABLED=1 npm run dev -- --host 127.0.0.1 --port 4321
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 테스트
+```bash
+npm test
+```
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## 빌드
+```bash
+npm run build
+```
 
-Any static assets, like images, can be placed in the `public/` directory.
+## 배포 (Vercel)
+1) GitHub에 푸시된 `main` 브랜치를 Vercel에 연결
+2) Framework: **Astro**
+3) Build Command: `npm run build`
+4) Output Directory: `dist`
 
-## 🧞 Commands
+`main` 브랜치에 push하면 자동 배포됩니다.
 
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## 문서
+- 기획/요구사항/IA: `docs/`
+- 화면 스펙: `docs/screens/`
+- 콘텐츠 샘플: `docs/content/samples/`
