@@ -9,9 +9,9 @@ import { StateGraph, START, END } from '@langchain/langgraph';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 const DEFAULT_MODEL = process.env.STORY_MODEL ?? 'gpt-5.2';
-const DEFAULT_REASONING_EFFORT = process.env.REASONING_EFFORT ?? 'high';
+const DEFAULT_REASONING_EFFORT = process.env.REASONING_EFFORT ?? 'medium';
 const DEFAULT_PLAN_MAX_ITERATIONS = Number(process.env.PLAN_MAX_ITERATIONS ?? 2);
-const DEFAULT_MIN_ITERATIONS = Number(process.env.MIN_REVIEW_ITERATIONS ?? 3);
+const DEFAULT_MIN_ITERATIONS = Number(process.env.MIN_REVIEW_ITERATIONS ?? 2);
 const CONTENT_DIR = path.resolve(process.cwd(), 'content', 'versions');
 const PIPELINE_DIR = path.resolve(process.cwd(), 'pipeline');
 const PIPELINE_META_DIR = path.join(PIPELINE_DIR, 'meta');
@@ -68,7 +68,7 @@ const parseArgs = (argv) => {
     source: '',
     tags: [],
     model: DEFAULT_MODEL,
-    maxIterations: 3,
+    maxIterations: 5,
     minIterations: DEFAULT_MIN_ITERATIONS,
     planMaxIterations: DEFAULT_PLAN_MAX_ITERATIONS,
     slug: '',
