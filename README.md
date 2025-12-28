@@ -56,6 +56,15 @@ npm test
 npm run build
 ```
 
+## 콘텐츠 생성 CLI
+정적 콘텐츠를 미리 생성하기 위한 파이프라인입니다.
+
+```bash
+npm run generate:story -- --title "..." --synopsis "..."
+```
+
+자세한 사용법은 `docs/cli-content-pipeline.md`를 참고하세요.
+
 ## 배포 (Vercel)
 1) GitHub에 푸시된 `main` 브랜치를 Vercel에 연결
 2) Framework: **Astro**
