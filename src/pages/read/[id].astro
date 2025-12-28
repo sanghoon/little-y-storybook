@@ -48,6 +48,23 @@ const seriesEstimated = isSeries
       </div>
     </section>
 
+    {related.length > 0 && (
+      <section class="card utility-card">
+        <details class="fold" aria-label="다른 버전" open={false}>
+          <summary>다른 버전</summary>
+          <div class="related-links">
+            {related.map((item) => (
+              <a class="related-chip" href={`/read/${item.id}`}>
+                <span class="related-title">{item.ageRange}세 · {item.lengthType}</span>
+                <span class="badge">{item.ageRange}세</span>
+                <span class="badge">{item.lengthType}</span>
+              </a>
+            ))}
+          </div>
+        </details>
+      </section>
+    )}
+
     {(isSeries || true) && (
       <section class="card utility-card">
         {isSeries && (
@@ -115,28 +132,6 @@ const seriesEstimated = isSeries
       )}
     </article>
 
-    {related.length > 0 && (
-      <section class="card">
-        <div class="section-header">
-          <h2>다른 버전</h2>
-          <p>연령/길이 다른 버전으로 바로 읽기</p>
-        </div>
-        <div class="card-grid compact">
-          {related.map((item) => (
-            <article class="mini-card">
-              <div>
-                <h3>{item.title}</h3>
-                <div class="meta">
-                  <span class="badge">{item.ageRange}세</span>
-                  <span class="badge">{item.lengthType}</span>
-                </div>
-              </div>
-              <a class="button secondary" href={`/read/${item.id}`}>읽기</a>
-            </article>
-          ))}
-        </div>
-      </section>
-    )}
   </div>
 
   <script is:inline>

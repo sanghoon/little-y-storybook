@@ -336,6 +336,31 @@ body {
   color: var(--accent-strong);
 }
 
+.related-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.related-chip {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  text-decoration: none;
+  color: var(--ink);
+  background: #fff;
+}
+
+.related-title {
+  font-size: 14px;
+  font-family: 'Gowun Dodum', sans-serif;
+}
+
 .mini-card {
   background: var(--card);
   border: 1px solid var(--line);
