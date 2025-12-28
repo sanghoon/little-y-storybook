@@ -1,0 +1,66 @@
+- id: story_001
+  title: 달빛 숲의 약속
+  summary: 달빛을 따라 길을 잃은 여우와 친구들이 약속을 지키며 집을 찾아가는 이야기
+  tags: [우정, 자연, 잔잔함, 창작]
+  versions:
+    - ver_001_a
+    - ver_001_b
+- id: story_002
+  title: 작은 용기의 날
+  summary: 소심한 고슴도치가 작은 용기를 내어 숲의 문제를 해결하는 이야기
+  tags: [용기, 성장, 교훈, 창작]
+  versions:
+    - ver_002_a
+    - ver_002_b
+- id: story_003
+  title: 구름 우체부
+  summary: 구름을 타고 편지를 배달하는 아이가 비밀 편지를 찾아 떠나는 이야기
+  tags: [상상, 모험, 유쾌함, 창작]
+  versions:
+    - ver_003_a
+    - ver_003_b
+- id: story_004
+  title: 바다의 수호자
+  summary: 바다 친구들이 힘을 모아 산호마을을 지키는 연작 이야기
+  tags: [모험, 동물, 유쾌함, 창작]
+  versions:
+    - ver_004_a
+- id: story_005
+  title: 해와 달의 약속
+  summary: 해와 달이 서로를 지키며 낮과 밤을 약속한 전래 느낌의 이야기
+  tags: [전래/민담, 교훈, 감동]
+  versions:
+    - ver_005_a
+    - ver_005_b
+- id: story_006
+  title: 호랑이와 은혜
+  summary: 어려움에 처한 호랑이와 이를 도운 아이가 서로 도움을 주고받는 이야기
+  tags: [전래/민담, 교훈, 가족]
+  versions:
+    - ver_006_a
+    - ver_006_b
+- id: story_007
+  title: 홍길동의 첫 모험
+  summary: 어린 홍길동이 마을을 돕기 위해 첫 모험을 떠나는 고전 각색 이야기
+  tags: [고전 원전, 각색/재해석, 모험]
+  versions:
+    - ver_007_a
+    - ver_007_b
+- id: story_008
+  title: 오디세우스의 항해
+  summary: 긴 항해 끝에 집으로 돌아가려는 영웅의 여정을 어린이용으로 각색한 이야기
+  tags: [신화/전설, 모험, 고전 원전]
+  versions:
+    - ver_008_a
+- id: story_009
+  title: 코끼리와 작은 새
+  summary: 큰 코끼리와 작은 새가 서로 도우며 친구가 되는 이야기
+  tags: [우정, 동물, 잔잔함]
+  versions:
+    - ver_009_a
+- id: story_010
+  title: 별을 찾는 아이
+  summary: 사라진 별을 찾아 떠나는 아이의 두 장짜리 연작 이야기
+  tags: [상상, 감동, 창작]
+  versions:
+    - ver_010_a
