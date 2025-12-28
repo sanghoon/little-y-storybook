@@ -421,12 +421,20 @@ const extractJson = (text) => {
   return JSON.parse(normalized);
 };
 
-const invokeJson = async (model, messages, label) => {
+const invokeJson = async (model, messages, label, schema) => {
   const response = await model.invoke(messages);
   const content = String(response.content ?? '');
   try {
     return extractJson(content);
   } catch (error) {
+    if (schema && typeof model.withStructuredOutput === 'function') {
+      try {
+        const structured = model.withStructuredOutput(schema);
+        return await structured.invoke(messages);
+      } catch {
+        // fall through to fixer
+      }
+    }
     try {
       const repaired = normalizeJsonLike(content);
       if (repaired) return JSON.parse(repaired);
@@ -517,7 +525,7 @@ const planPrompt = (input) => {
 };
 
 const planReviewPrompt = ({ plan, input, lengthTarget }) => {
-  const system = `You are a veteran Korean children's book editor and read-aloud specialist.\n\nRules:\n- Take time to think carefully before answering.\n- Purpose: ensure the plan will produce a high-quality read-aloud storybook.\n- Review the plan for read-aloud suitability, narrative coherence, age fit, and emotional tone.\n- Do NOT push overly simplistic or babyish vocabulary; keep a natural children’s literature tone.\n- This is not a picture book; ensure the text alone carries the story.\n- Flag if story_summary/version_summary includes production notes (낭독용/부작/각색/버전/시리즈/에피소드/분량).\n- Check episode cuts (if series) are logical, distinct, and flow naturally into the next part.\n- Ensure adaptation_plan stays story-focused; flag if it turns into teaching lists or style checklists.\n- If major issues exist, status must be \"revise\".\n- Avoid nitpicking; only flag issues that would matter to a caregiver reading aloud.\n- Output ONLY valid JSON (no markdown, no commentary).\n\nOutput schema example:\n{\n  \"status\": \"pass\",\n  \"issues\": [{\"type\": \"structure\", \"detail\": \"...\"}],\n  \"must_fix\": [\"...\"],\n  \"suggestions\": [\"...\"],\n  \"plan_alignment\": {\n    \"read_aloud_ok\": true,\n    \"age_fit_ok\": true,\n    \"episode_cuts_ok\": true,\n    \"notes\": \"...\"\n  },\n  \"revision_brief\": \"...\"\n}`;
+  const system = `You are a veteran Korean children's book editor and read-aloud specialist.\n\nRules:\n- Take time to think carefully before answering.\n- Purpose: ensure the plan will produce a high-quality read-aloud storybook.\n- Review the plan for read-aloud suitability, narrative coherence, age fit, and emotional tone.\n- Do NOT push overly simplistic or babyish vocabulary; keep a natural children’s literature tone.\n- This is not a picture book; ensure the text alone carries the story.\n- Flag if story_summary/version_summary includes production notes (낭독용/부작/각색/버전/시리즈/에피소드/분량).\n- Check episode cuts (if series) are logical, distinct, and flow naturally into the next part.\n- Ensure adaptation_plan stays story-focused; flag if it turns into teaching lists or style checklists.\n- If major issues exist, status must be \"revise\".\n- Avoid nitpicking; only flag issues that would matter to a caregiver reading aloud.\n- All fields are required. If none, use null or empty arrays/empty strings.\n- Output ONLY valid JSON (no markdown, no commentary).\n\nOutput schema example:\n{\n  \"status\": \"pass\",\n  \"issues\": [{\"type\": \"structure\", \"detail\": \"...\"}],\n  \"must_fix\": [],\n  \"suggestions\": [],\n  \"plan_alignment\": {\n    \"read_aloud_ok\": true,\n    \"age_fit_ok\": true,\n    \"episode_cuts_ok\": true,\n    \"notes\": \"\"\n  },\n  \"revision_brief\": \"\"\n}`;
 
   const human = `PLAN REVIEW CONTEXT:\n"""\n${JSON.stringify(
     {
@@ -592,7 +600,7 @@ const draftPrompt = ({ plan, episodeIndex, episodeCount, isFinal, lengthTarget }
 };
 
 const reviewPrompt = ({ plan, draft, episodeIndex, episodeCount, lengthMetrics, lengthTarget }) => {
-  const system = `You are a veteran Korean children's book editor and read-aloud specialist.\n\nRules:\n- Take time to think carefully before answering.\n- Purpose: evaluate and refine the draft into a high-quality read-aloud storybook text.\n- Review for consistency, flow, sentence quality, grammar, spelling, and age appropriateness.\n- This must be readable aloud with natural rhythm; translation-like or awkward phrasing is NOT acceptable.\n- Do NOT invent problems; if unsure, do not flag it.\n- Do NOT demand overly simplistic or babyish vocabulary; keep a natural children’s literature tone.\n- This is not a picture book; the text must stand on its own.\n- Avoid didactic, checklist-style teaching; the lesson should feel woven into the story.\n- Flag excessive direct prompts to the listener (e.g., 반복되는 ‘우리도/함께’ 지시).\n- Avoid nitpicking; only flag issues that affect read-aloud quality or story clarity.\n- Check length against the provided target and request adjustments if too short/long.\n- Verify the draft follows the plan: characters, setting, and outlined events. Detect 플랜 이탈.\n- When you flag an issue, include a short evidence snippet (<=12 words) from the draft. If you cannot cite evidence, do NOT flag it.\n- If any major issue exists, status must be "revise".\n- Output ONLY valid JSON (no markdown, no commentary).\n\nOutput schema example:\n{\n  "status": "pass",\n  "issues": [{\"type\": \"consistency\", \"detail\": \"...\", \"evidence\": \"...\"}],\n  "must_fix": [\"...\"],\n  "suggestions": [\"...\"],\n  "plan_alignment": {\n    \"characters_ok\": true,\n    \"setting_ok\": true,\n    \"outline_covered\": true,\n    \"plan_deviation\": false,\n    \"notes\": \"...\"\n  }\n}`;
+  const system = `You are a veteran Korean children's book editor and read-aloud specialist.\n\nRules:\n- Take time to think carefully before answering.\n- Purpose: evaluate and refine the draft into a high-quality read-aloud storybook text.\n- Review for consistency, flow, sentence quality, grammar, spelling, and age appropriateness.\n- This must be readable aloud with natural rhythm; translation-like or awkward phrasing is NOT acceptable.\n- Do NOT invent problems; if unsure, do not flag it.\n- Do NOT demand overly simplistic or babyish vocabulary; keep a natural children’s literature tone.\n- This is not a picture book; the text must stand on its own.\n- Avoid didactic, checklist-style teaching; the lesson should feel woven into the story.\n- Flag excessive direct prompts to the listener (e.g., 반복되는 ‘우리도/함께’ 지시).\n- Avoid nitpicking; only flag issues that affect read-aloud quality or story clarity.\n- Check length against the provided target and request adjustments if too short/long.\n- Verify the draft follows the plan: characters, setting, and outlined events. Detect 플랜 이탈.\n- When you flag an issue, include a short evidence snippet (<=12 words) from the draft. If you cannot cite evidence, do NOT flag it.\n- If any major issue exists, status must be "revise".\n- All fields are required. If none, use null or empty arrays/empty strings.\n- Output ONLY valid JSON (no markdown, no commentary).\n\nOutput schema example:\n{\n  \"status\": \"pass\",\n  \"issues\": [{\"type\": \"consistency\", \"detail\": \"...\", \"evidence\": \"...\"}],\n  \"must_fix\": [],\n  \"suggestions\": [],\n  \"plan_alignment\": {\n    \"characters_ok\": true,\n    \"setting_ok\": true,\n    \"outline_covered\": true,\n    \"plan_deviation\": false,\n    \"notes\": \"\"\n  }\n}`;
 
   const human = `CONTEXT:\n"""\n${JSON.stringify(
     {
@@ -700,11 +708,14 @@ const estimateReadTime = async ({ model, plan, drafts, lengthStats }) => {
   const episodeCount = drafts.length || 1;
   const fallback = estimateReadTimeFallback(lengthStats, episodeCount);
   try {
-    const response = await invokeJson(
-      model,
-      readTimePrompt({ plan, drafts, lengthStats }),
-      'read_time'
-    );
+    const response = typeof model.withStructuredOutput === 'function'
+      ? await model.withStructuredOutput(ReadTimeSchema).invoke(readTimePrompt({ plan, drafts, lengthStats }))
+      : await invokeJson(
+          model,
+          readTimePrompt({ plan, drafts, lengthStats }),
+          'read_time',
+          ReadTimeSchema
+        );
     return normalizeReadTime(response, episodeCount, fallback);
   } catch (error) {
     return fallback;
@@ -821,11 +832,85 @@ const StoryState = z.object({
   episodeMeta: z.array(z.any()).optional(),
 });
 
+const PlanSchema = z.object({
+  mode: z.string(),
+  source_story: z.string(),
+  adaptation_needed: z.boolean(),
+  adaptation_plan: z.string(),
+  story_title: z.string(),
+  story_summary: z.string(),
+  version_title: z.string(),
+  version_summary: z.string(),
+  story_slug_en: z.string(),
+  target_age_range: z.string(),
+  length_type: z.string(),
+  episode_count: z.number(),
+  tags: z.array(z.string()),
+  characters: z.array(z.string()),
+  setting: z.string(),
+  themes: z.array(z.string()),
+  plot_outline: z.array(z.string()),
+  episode_outlines: z.array(
+    z.object({
+      episode: z.number(),
+      title: z.string(),
+      summary: z.string(),
+      beats: z.array(z.string()),
+    })
+  ),
+  style_guide: z.string(),
+});
+
+const PlanReviewSchema = z.object({
+  status: z.string(),
+  issues: z.array(z.object({ type: z.string(), detail: z.string() })).nullable(),
+  must_fix: z.array(z.string()).nullable(),
+  suggestions: z.array(z.string()).nullable(),
+  plan_alignment: z
+    .object({
+      read_aloud_ok: z.boolean(),
+      age_fit_ok: z.boolean(),
+      episode_cuts_ok: z.boolean(),
+      notes: z.string(),
+    })
+    .nullable(),
+  revision_brief: z.string().nullable(),
+});
+
+const ReviewSchema = z.object({
+  status: z.string(),
+  issues: z
+    .array(z.object({ type: z.string(), detail: z.string(), evidence: z.string().nullable() }))
+    .nullable(),
+  must_fix: z.array(z.string()).nullable(),
+  suggestions: z.array(z.string()).nullable(),
+  plan_alignment: z
+    .object({
+      characters_ok: z.boolean(),
+      setting_ok: z.boolean(),
+      outline_covered: z.boolean(),
+      plan_deviation: z.boolean(),
+      notes: z.string(),
+    })
+    .nullable(),
+});
+
+const ReadTimeSchema = z.object({
+  total_minutes: z.number(),
+  per_episode_minutes: z.array(z.number()),
+});
+
 const buildGraph = ({ planner, writer, reviewer }) => {
   const graph = new StateGraph(StoryState);
 
   graph.addNode('prepare_step', async (state) => {
-    const plan = await invokeJson(planner, planPrompt(state.input), 'plan');
+    let plan;
+    if (typeof planner.withStructuredOutput === 'function') {
+      const structured = planner.withStructuredOutput(PlanSchema);
+      plan = await structured.invoke(planPrompt(state.input));
+    } else {
+      plan = await invokeJson(planner, planPrompt(state.input), 'plan', PlanSchema);
+    }
     const normalized = normalizePlan(plan, state.input);
     return {
       plan: normalized,
@@ -845,11 +930,16 @@ const buildGraph = ({ planner, writer, reviewer }) => {
       state.plan?.target_age_range,
       state.plan?.length_type
     );
-    const review = await invokeJson(
-      reviewer,
-      planReviewPrompt({ plan: state.plan, input: state.input, lengthTarget }),
-      'plan_review'
-    );
+    const review = typeof reviewer.withStructuredOutput === 'function'
+      ? await reviewer
+          .withStructuredOutput(PlanReviewSchema)
+          .invoke(planReviewPrompt({ plan: state.plan, input: state.input, lengthTarget }))
+      : await invokeJson(
+          reviewer,
+          planReviewPrompt({ plan: state.plan, input: state.input, lengthTarget }),
+          'plan_review',
+          PlanReviewSchema
+        );
 
     const normalizedReview = {
       ...review,
@@ -915,11 +1005,16 @@ const buildGraph = ({ planner, writer, reviewer }) => {
   });
 
   graph.addNode('plan_revise_step', async (state) => {
-    const revised = await invokeJson(
-      planner,
-      planRevisePrompt({ plan: state.plan, review: state.planReview, input: state.input }),
-      'plan_revise'
-    );
+    const revised = typeof planner.withStructuredOutput === 'function'
+      ? await planner
+          .withStructuredOutput(PlanSchema)
+          .invoke(planRevisePrompt({ plan: state.plan, review: state.planReview, input: state.input }))
+      : await invokeJson(
+          planner,
+          planRevisePrompt({ plan: state.plan, review: state.planReview, input: state.input }),
+          'plan_revise',
+          PlanSchema
+        );
     const normalized = normalizePlan(revised, state.input);
     return {
       plan: normalized,
@@ -959,18 +1054,32 @@ const buildGraph = ({ planner, writer, reviewer }) => {
       state.plan?.length_type
     );
     const lengthMetrics = measureLength(state.draft ?? '');
-    const review = await invokeJson(
-      reviewer,
-      reviewPrompt({
-        plan: state.plan,
-        draft: state.draft,
-        episodeIndex,
-        episodeCount,
-        lengthMetrics,
-        lengthTarget,
-      }),
-      'review'
-    );
+    const review = typeof reviewer.withStructuredOutput === 'function'
+      ? await reviewer
+          .withStructuredOutput(ReviewSchema)
+          .invoke(
+            reviewPrompt({
+              plan: state.plan,
+              draft: state.draft,
+              episodeIndex,
+              episodeCount,
+              lengthMetrics,
+              lengthTarget,
+            })
+          )
+      : await invokeJson(
+          reviewer,
+          reviewPrompt({
+            plan: state.plan,
+            draft: state.draft,
+            episodeIndex,
+            episodeCount,
+            lengthMetrics,
+            lengthTarget,
+          }),
+          'review',
+          ReviewSchema
+        );
 
     const lengthCheck = checkLength(lengthMetrics, lengthTarget);
     const normalizedReview = {
