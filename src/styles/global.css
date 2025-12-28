@@ -1,0 +1,377 @@
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Batang&family=Gowun+Dodum&display=swap');
+
+:root {
+  --bg: #fbf6ef;
+  --bg-soft: #f5eadb;
+  --ink: #2f2520;
+  --ink-soft: #5a4b40;
+  --accent: #d08c60;
+  --accent-strong: #a35a2b;
+  --card: #fffaf4;
+  --line: rgba(47, 37, 32, 0.12);
+  --shadow: 0 12px 30px rgba(47, 37, 32, 0.1);
+  --radius-lg: 24px;
+  --radius-md: 16px;
+  --radius-sm: 999px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Gowun Batang', serif;
+  color: var(--ink);
+  background: radial-gradient(circle at top, #fff, var(--bg));
+  min-height: 100vh;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 20px 8px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(120deg, #fff, var(--bg-soft));
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: 'Gowun Dodum', sans-serif;
+}
+
+.brand a {
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 20px;
+  letter-spacing: 0.04em;
+}
+
+.brand span {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.site-nav {
+  display: flex;
+  gap: 16px;
+  font-family: 'Gowun Dodum', sans-serif;
+}
+
+.site-nav a {
+  text-decoration: none;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.page {
+  flex: 1;
+  padding: 24px 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-family: 'Gowun Dodum', sans-serif;
+}
+
+.section-header p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card h3 {
+  margin: 0;
+  font-size: 18px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.badge {
+  background: var(--bg-soft);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--accent);
+  color: var(--accent-strong);
+  background: rgba(208, 140, 96, 0.08);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-family: 'Gowun Dodum', sans-serif;
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.button.secondary {
+  background: transparent;
+  color: var(--accent-strong);
+  border: 1px solid var(--accent);
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip-row.is-scroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+}
+
+.chip-row.is-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  border: 1px solid var(--line);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 12px;
+  font-family: 'Gowun Dodum', sans-serif;
+  cursor: pointer;
+}
+
+.chip.is-active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.reader {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  line-height: 1.9;
+  font-size: 18px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.reader h3 {
+  margin-top: 24px;
+  font-family: 'Gowun Dodum', sans-serif;
+}
+
+.reader-controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-family: 'Gowun Dodum', sans-serif;
+}
+
+.site-footer {
+  padding: 16px 20px 32px;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.search-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-bar input {
+  flex: 1;
+  min-width: 220px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  font-family: 'Gowun Dodum', sans-serif;
+}
+
+.reader-mode .site-header,
+.reader-mode .site-footer {
+  display: none;
+}
+
+.reader-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(120deg, #fff, var(--bg-soft));
+  border-bottom: 1px solid var(--line);
+  font-family: 'Gowun Dodum', sans-serif;
+}
+
+.reader-title {
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.reader-back {
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.reader-page {
+  padding-top: 16px;
+}
+
+.progress {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #fff;
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--accent);
+  border-radius: 999px;
+  width: 0%;
+  flex: 1;
+}
+
+.chapter-nav {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.empty-state {
+  margin-top: 16px;
+  display: none;
+}
+
+.empty-state.is-visible {
+  display: flex;
+}
+
+.cta-bar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: #fffaf4;
+  border: 1px solid var(--line);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .page {
+    padding: 20px 16px 32px;
+  }
+}

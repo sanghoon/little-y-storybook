@@ -1,0 +1,246 @@
+---
+import ReaderLayout from '../../layouts/ReaderLayout.astro';
+import { loadVersions } from '../../lib/content';
+
+export function getStaticPaths() {
+  const versions = loadVersions();
+  return versions.map((version) => ({ params: { id: version.id } }));
+}
+
+const { id } = Astro.params;
+const versions = loadVersions();
+const version = versions.find((item) => item.id === id);
+
+if (!version) {
+  throw new Error(`Version not found: ${id}`);
+}
+
+const chapters = version.chapters ?? [];
+const isSeries = version.lengthType === 'series' && chapters.length > 0;
+---
+
+<ReaderLayout title={`${version.title} 읽기`} backHref={`/stories/${version.id}`}>
+  <section class="card">
+    <div class="section-header">
+      <h2>{version.title}</h2>
+      <p>{version.ageRange}세 · {version.lengthType}</p>
+    </div>
+  </section>
+
+  {isSeries && (
+    <section class="card">
+      <div class="section-header">
+        <h2>회차 목록</h2>
+        <p>원하는 회차부터 읽을 수 있어요.</p>
+      </div>
+      <div class="chip-row is-scroll" data-chapter-nav>
+        {chapters.map((chapter) => (
+          <a class="chip" href={`#chapter-${chapter.index}`} data-chapter-link>
+            {chapter.title}
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section class="card">
+    <div class="section-header">
+      <h2>읽기 설정</h2>
+      <p>글자 크기를 조절할 수 있어요.</p>
+    </div>
+    <div class="reader-controls">
+      <label class="range">
+        글자 크기
+        <input type="range" min="16" max="24" value="18" data-font-size />
+      </label>
+    </div>
+  </section>
+
+  <div class="progress" data-progress>
+    <div class="progress-bar" data-progress-bar></div>
+    <span data-progress-label>0%</span>
+  </div>
+
+  <article
+    class="reader"
+    data-version-id={version.id}
+    data-title={version.title}
+    data-age={version.ageRange}
+    data-length={version.lengthType}
+    data-series={isSeries}
+  >
+    {isSeries ? (
+      chapters.map((chapter) => (
+        <section id={`chapter-${chapter.index}`} data-chapter-index={chapter.index}>
+          <h3>{chapter.title}</h3>
+          {chapter.estimatedReadTime && (
+            <p class="meta">예상 읽기 시간 {chapter.estimatedReadTime}분</p>
+          )}
+          <div set:html={chapter.html} />
+          <div class="chapter-nav">
+            {chapter.index > 1 && (
+              <a class="button secondary" href={`#chapter-${chapter.index - 1}`}>
+                이전 회차
+              </a>
+            )}
+            {chapter.index < chapters.length && (
+              <a class="button" href={`#chapter-${chapter.index + 1}`}>
+                다음 회차
+              </a>
+            )}
+          </div>
+        </section>
+      ))
+    ) : (
+      <div set:html={version.html} />
+    )}
+  </article>
+
+  <script is:inline>
+    (() => {
+    const reader = document.querySelector('.reader');
+    const range = document.querySelector('[data-font-size]');
+
+    if (range && reader) {
+      const savedSize = localStorage.getItem('storybook:font-size');
+      if (savedSize) {
+        reader.style.fontSize = `${savedSize}px`;
+        range.value = savedSize;
+      }
+
+      range.addEventListener('input', (event) => {
+        const value = event.target.value;
+        reader.style.fontSize = `${value}px`;
+        localStorage.setItem('storybook:font-size', value);
+      });
+    }
+
+    if (!reader) return;
+
+    const updateRecent = (chapterIndex = 1) => {
+      const record = {
+        id: reader.dataset.versionId,
+        title: reader.dataset.title,
+        age_range: reader.dataset.age,
+        length_type: reader.dataset.length,
+        last_chapter_index: chapterIndex,
+        last_read_at: new Date().toISOString(),
+      };
+
+      const raw = localStorage.getItem('storybook:recent');
+      const recent = raw ? JSON.parse(raw) : [];
+      const filtered = recent.filter((item) => item.id !== record.id);
+      filtered.unshift(record);
+      localStorage.setItem('storybook:recent', JSON.stringify(filtered.slice(0, 5)));
+    };
+
+    const getStoredChapter = () => {
+      const raw = localStorage.getItem('storybook:recent');
+      if (!raw) return null;
+      const recent = JSON.parse(raw);
+      return recent.find((item) => item.id === reader.dataset.versionId) || null;
+    };
+
+    let currentIndex = null;
+
+    const applyChapterHighlight = (index) => {
+      document.querySelectorAll('[data-chapter-link]').forEach((link) => {
+        link.classList.toggle(
+          'is-active',
+          link.getAttribute('href') === `#chapter-${index}`
+        );
+      });
+    };
+
+    const setCurrentIndex = (index) => {
+      if (currentIndex === index) return;
+      currentIndex = index;
+      updateRecent(index);
+      applyChapterHighlight(index);
+    };
+
+    const syncFromHash = () => {
+      const hash = window.location.hash || '';
+      const chapterMatch = hash.match(/chapter-(\d+)/);
+      const index = chapterMatch ? Number(chapterMatch[1]) : 1;
+      setCurrentIndex(index);
+    };
+
+    const maybeRestore = () => {
+      if (!reader) return false;
+      const isSeries = reader.dataset.series === 'true';
+      if (!isSeries) return false;
+      const hash = window.location.hash || '';
+      if (hash) return false;
+      const stored = getStoredChapter();
+      if (!stored?.last_chapter_index) return false;
+      window.location.replace(`#chapter-${stored.last_chapter_index}`);
+      return true;
+    };
+
+    if (maybeRestore()) {
+      setTimeout(syncFromHash, 0);
+    } else {
+      syncFromHash();
+    }
+
+    const handleAnchorClick = (event) => {
+      const link = event.currentTarget;
+      const match = link.getAttribute('href')?.match(/chapter-(\d+)/);
+      if (!match) return;
+      const index = Number(match[1]);
+      setCurrentIndex(index);
+    };
+
+    document.querySelectorAll('a[href^=\"#chapter-\"]').forEach((link) => {
+      link.addEventListener('click', handleAnchorClick);
+    });
+
+    window.addEventListener('hashchange', syncFromHash);
+
+    if (reader.dataset.series === 'true') {
+      const sections = Array.from(
+        document.querySelectorAll('[data-chapter-index]')
+      );
+
+      const resolveFromScroll = () => {
+        if (!sections.length) return;
+        const targetY = window.innerHeight * 0.35;
+        let active = sections[0];
+        sections.forEach((section) => {
+          const rect = section.getBoundingClientRect();
+          if (rect.top <= targetY) active = section;
+        });
+        const index = Number(active.dataset.chapterIndex || 1);
+        setCurrentIndex(index);
+      };
+
+      let ticking = false;
+      const onScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(() => {
+          resolveFromScroll();
+          ticking = false;
+        });
+      };
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      resolveFromScroll();
+    }
+
+    const progressBar = document.querySelector('[data-progress-bar]');
+    const progressLabel = document.querySelector('[data-progress-label]');
+    const updateProgress = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.body.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0;
+      if (progressBar) progressBar.style.width = `${progress}%`;
+      if (progressLabel) progressLabel.textContent = `${Math.round(progress)}%`;
+    };
+
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
+    })();
+  </script>
+</ReaderLayout>

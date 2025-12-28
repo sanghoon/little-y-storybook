@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { loadVersions, getRelatedVersions } from '../../lib/content';
+
+export function getStaticPaths() {
+  const versions = loadVersions();
+  return versions.map((version) => ({ params: { id: version.id } }));
+}
+
+const { id } = Astro.params;
+const versions = loadVersions();
+const version = versions.find((item) => item.id === id);
+
+if (!version) {
+  throw new Error(`Version not found: ${id}`);
+}
+
+const related = getRelatedVersions(versions, version);
+---
+
+<BaseLayout title={`${version.title} | Little Y Storybook`}>
+  <section class="card">
+    <h2>{version.title}</h2>
+    <p>{version.summary}</p>
+    <div class="meta">
+      <span class="badge">{version.ageRange}세</span>
+      <span class="badge">{version.lengthType}</span>
+      {version.estimatedReadTime && (
+        <span class="badge">{version.estimatedReadTime}분</span>
+      )}
+    </div>
+    <div class="tag-list">
+      {version.tags.map((tag) => (
+        <span class="tag">{tag}</span>
+      ))}
+    </div>
+  </section>
+
+  <div class="cta-bar">
+    <a class="button" href={`/read/${version.id}`}>읽기 시작</a>
+    <a class="button secondary" href="/stories">다른 이야기 보기</a>
+  </div>
+
+  {related.length > 0 && (
+    <section>
+      <div class="section-header">
+        <h2>다른 버전</h2>
+        <p>같은 이야기의 다른 연령/길이 버전이에요.</p>
+      </div>
+      <div class="card-grid">
+        {related.map((item) => (
+          <article class="card">
+            <h3>{item.title}</h3>
+            <div class="meta">
+              <span class="badge">{item.ageRange}세</span>
+              <span class="badge">{item.lengthType}</span>
+            </div>
+            <a class="button" href={`/stories/${item.id}`}>이 버전 보기</a>
+          </article>
+        ))}
+      </div>
+    </section>
+  )}
+</BaseLayout>

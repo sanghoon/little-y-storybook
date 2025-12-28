@@ -1,0 +1,26 @@
+---
+import '../styles/global.css';
+
+const { title = '읽기', backHref = '/stories' } = Astro.props;
+---
+
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="reader-mode">
+    <div class="app-shell">
+      <header class="reader-header">
+        <a class="reader-back" href={backHref}>← 돌아가기</a>
+        <span class="reader-title">{title}</span>
+      </header>
+      <main class="page reader-page">
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>

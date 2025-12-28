@@ -1,0 +1,212 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { loadVersions, getExcerpt } from '../../lib/content';
+
+const versions = loadVersions();
+const ages = ['3-5', '6-7', '8-9'];
+const lengths = ['short', 'medium', 'long', 'series'];
+const lengthLabels = {
+  short: '짧음',
+  medium: '보통',
+  long: '김',
+  series: '연작',
+};
+const tags = Array.from(
+  new Set(versions.flatMap((version) => version.tags))
+).slice(0, 12);
+---
+
+<BaseLayout title="전체 이야기">
+  <section>
+    <div class="section-header">
+      <h2>전체 이야기</h2>
+      <p data-count>{versions.length}개의 이야기가 준비되어 있어요.</p>
+    </div>
+
+    <div class="search-bar">
+      <input type="search" placeholder="제목이나 키워드를 입력하세요" data-search />
+      <button class="button secondary" type="button" data-reset>초기화</button>
+    </div>
+
+    <div class="chip-row is-scroll" data-filter-group="age">
+      <button class="chip is-active" data-filter-value="" type="button">전체 연령</button>
+      {ages.map((age) => (
+        <button
+          class="chip"
+          data-filter-value={age}
+          type="button"
+          aria-label={`${age}세 연령`}
+        >
+          {age}세
+        </button>
+      ))}
+    </div>
+
+    <div class="chip-row is-scroll" data-filter-group="length">
+      <button class="chip is-active" data-filter-value="" type="button">전체 길이</button>
+      {lengths.map((length) => (
+        <button
+          class="chip"
+          data-filter-value={length}
+          type="button"
+          aria-label={`${lengthLabels[length]} 길이`}
+        >
+          {lengthLabels[length]}
+        </button>
+      ))}
+    </div>
+
+    <div class="chip-row is-scroll" data-filter-group="tag">
+      <button class="chip is-active" data-filter-value="" type="button">전체 태그</button>
+      {tags.map((tag) => (
+        <button
+          class="chip"
+          data-filter-value={tag}
+          type="button"
+          aria-label={`${tag} 태그`}
+        >
+          {tag}
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <section>
+    <div class="card-grid" data-card-grid>
+      {versions.map((version) => (
+        <article
+          class="card"
+          data-age={version.ageRange}
+          data-length={version.lengthType}
+          data-tags={version.tags.join(',')}
+          data-title={version.title}
+          data-summary={version.summary}
+        >
+          <h3>{version.title}</h3>
+          <p>{getExcerpt(version, 100)}</p>
+          <div class="meta">
+            <span class="badge">{version.ageRange}세</span>
+            <span class="badge">{version.lengthType}</span>
+          </div>
+          <div class="tag-list">
+            {version.tags.slice(0, 4).map((tag) => (
+              <span class="tag">{tag}</span>
+            ))}
+          </div>
+          <a class="button" href={`/stories/${version.id}`}>자세히 보기</a>
+        </article>
+      ))}
+    </div>
+    <div class="card empty-state" data-empty>
+      <h3>조건에 맞는 이야기가 없어요</h3>
+      <p>필터를 초기화하거나 다른 태그를 선택해보세요.</p>
+      <button class="button" type="button" data-reset>필터 초기화</button>
+    </div>
+  </section>
+
+  <script is:inline>
+    const state = { age: '', length: '', tag: '', query: '' };
+    const countEl = document.querySelector('[data-count]');
+    const emptyEl = document.querySelector('[data-empty]');
+    const searchInput = document.querySelector('[data-search]');
+    const resetButtons = document.querySelectorAll('[data-reset]');
+
+    const params = new URLSearchParams(window.location.search);
+    state.age = params.get('age') || '';
+    state.length = params.get('length') || '';
+    state.tag = params.get('tag') || '';
+    state.query = params.get('q') || '';
+
+    if (searchInput) searchInput.value = state.query;
+
+    const syncButtons = () => {
+      document.querySelectorAll('[data-filter-group]').forEach((group) => {
+        const groupName = group.dataset.filterGroup;
+        const value = state[groupName] || '';
+        group.querySelectorAll('button').forEach((button) => {
+          button.classList.toggle(
+            'is-active',
+            (button.dataset.filterValue || '') === value
+          );
+        });
+      });
+    };
+
+    const updateUrl = () => {
+      const next = new URLSearchParams();
+      if (state.age) next.set('age', state.age);
+      if (state.length) next.set('length', state.length);
+      if (state.tag) next.set('tag', state.tag);
+      if (state.query) next.set('q', state.query);
+      const nextUrl = `${window.location.pathname}${next.toString() ? `?${next}` : ''}`;
+      window.history.replaceState({}, '', nextUrl);
+    };
+    const updateCards = () => {
+      const cards = document.querySelectorAll('[data-card-grid] .card');
+      let count = 0;
+      cards.forEach((card) => {
+        const age = card.dataset.age || '';
+        const length = card.dataset.length || '';
+        const tags = card.dataset.tags || '';
+        const title = card.dataset.title || '';
+        const summary = card.dataset.summary || '';
+
+        const matchAge = !state.age || age === state.age;
+        const matchLength = !state.length || length === state.length;
+        const matchTag = !state.tag || tags.includes(state.tag);
+        const queryTarget = `${title} ${summary} ${tags}`.toLowerCase();
+        const matchQuery =
+          !state.query || queryTarget.includes(state.query.toLowerCase());
+
+        const visible = matchAge && matchLength && matchTag && matchQuery;
+        card.style.display = visible ? 'flex' : 'none';
+        if (visible) count += 1;
+      });
+
+      if (countEl) {
+        countEl.textContent = `${count}개의 이야기가 준비되어 있어요.`;
+      }
+
+      if (emptyEl) {
+        emptyEl.classList.toggle('is-visible', count === 0);
+      }
+    };
+
+    document.querySelectorAll('[data-filter-group]').forEach((group) => {
+      group.addEventListener('click', (event) => {
+        const target = event.target.closest('button');
+        if (!target) return;
+        const value = target.dataset.filterValue || '';
+        const groupName = group.dataset.filterGroup;
+        state[groupName] = value;
+        syncButtons();
+        updateUrl();
+        updateCards();
+      });
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (event) => {
+        state.query = event.target.value.trim();
+        updateUrl();
+        updateCards();
+      });
+    }
+
+    resetButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        state.age = '';
+        state.length = '';
+        state.tag = '';
+        state.query = '';
+        if (searchInput) searchInput.value = '';
+        syncButtons();
+        updateUrl();
+        updateCards();
+      });
+    });
+
+    syncButtons();
+    updateCards();
+  </script>
+</BaseLayout>

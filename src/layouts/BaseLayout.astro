@@ -1,0 +1,49 @@
+---
+import '../styles/global.css';
+
+const { title = 'Little Y Storybook', description, image } = Astro.props;
+const canonical = Astro.url?.toString();
+const metaDescription =
+  description ?? '아이에게 들려줄 이야기를 연령과 길이 기준으로 찾아보세요.';
+---
+
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={metaDescription} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:type" content="website" />
+    {canonical && <meta property="og:url" content={canonical} />}
+    {image && <meta property="og:image" content={image} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    {image && <meta name="twitter:image" content={image} />}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="site-header">
+        <div class="brand">
+          <a href="/">Little Y Storybook</a>
+          <span>잠들기 전, 한 편의 이야기</span>
+        </div>
+        <nav class="site-nav">
+          <a href="/">홈</a>
+          <a href="/stories">전체 이야기</a>
+        </nav>
+      </header>
+
+      <main class="page">
+        <slot />
+      </main>
+
+      <footer class="site-footer">
+        <p>작은 이야기들이 모여 큰 꿈이 됩니다.</p>
+      </footer>
+    </div>
+  </body>
+</html>
