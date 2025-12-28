@@ -13,7 +13,7 @@ const DEFAULT_REASONING_EFFORT = process.env.REASONING_EFFORT ?? 'high';
 const DEFAULT_PLAN_MAX_ITERATIONS = Number(process.env.PLAN_MAX_ITERATIONS ?? 2);
 const DEFAULT_MIN_ITERATIONS = Number(process.env.MIN_REVIEW_ITERATIONS ?? 3);
 const CONTENT_DIR = path.resolve(process.cwd(), 'content', 'versions');
-const PIPELINE_DIR = path.resolve(process.cwd(), 'content', 'pipeline');
+const PIPELINE_DIR = path.resolve(process.cwd(), 'pipeline');
 const PIPELINE_META_DIR = path.join(PIPELINE_DIR, 'meta');
 const STORIES_PATH = path.resolve(process.cwd(), 'content', 'stories.yml');
 
@@ -193,7 +193,7 @@ const LENGTH_PROFILE = {
   short: { min: 700, max: 1100 },
   medium: { min: 1100, max: 1700 },
   long: { min: 1700, max: 2500 },
-  series: { min: 700, max: 1200 },
+  series: { min: 700, max: 1700 },
 };
 
 const getLengthTarget = (_ageRange, lengthType) => {
@@ -216,9 +216,17 @@ const measureLength = (text) => {
 
 const checkLength = (metrics, target) => {
   const value = metrics.char_count_no_space;
+  const ok = value >= target.min && value <= target.max;
+  const diff = value < target.min ? target.min - value : value > target.max ? value - target.max : 0;
+  const range = Math.max(1, target.max - target.min);
+  const softThreshold = Math.max(120, Math.round(range * 0.15));
+  const hardThreshold = Math.max(250, Math.round(range * 0.35));
+  const severity = ok ? 'ok' : diff <= softThreshold ? 'soft' : diff <= hardThreshold ? 'medium' : 'hard';
   return {
-    ok: value >= target.min && value <= target.max,
+    ok,
     value,
+    diff,
+    severity,
   };
 };
 
@@ -366,11 +374,43 @@ const normalizeJsonLike = (text) => {
   const cleaned = stripFences(text);
   const match = cleaned.match(/\{[\s\S]*\}/) || cleaned.match(/\[[\s\S]*\]/);
   if (!match) return '';
-  return match[0]
+  const sanitized = match[0]
     .replace(/[“”]/g, '"')
     .replace(/[‘’]/g, "'")
     .replace(/,\s*([}\]])/g, '$1')
     .trim();
+  return sanitizeJsonString(sanitized);
+};
+
+const sanitizeJsonString = (value) => {
+  let inString = false;
+  let escaped = false;
+  let output = '';
+  for (const char of value) {
+    if (inString) {
+      if (char === '\n') {
+        output += '\\n';
+        continue;
+      }
+      if (char === '\r') {
+        continue;
+      }
+      if (char === '\t') {
+        output += '\\t';
+        continue;
+      }
+    }
+    if (char === '"' && !escaped) {
+      inString = !inString;
+    }
+    if (char === '\\' && !escaped) {
+      escaped = true;
+    } else {
+      escaped = false;
+    }
+    output += char;
+  }
+  return output;
 };
 
 const extractJson = (text) => {
@@ -383,20 +423,22 @@ const extractJson = (text) => {
 
 const invokeJson = async (model, messages, label) => {
   const response = await model.invoke(messages);
+  const content = String(response.content ?? '');
   try {
-    return extractJson(response.content);
+    return extractJson(content);
   } catch (error) {
     try {
-      const repaired = normalizeJsonLike(response.content);
+      const repaired = normalizeJsonLike(content);
       if (repaired) return JSON.parse(repaired);
     } catch {
       // fall through to model fixer
     }
+    const systemHint = messages.find((msg) => msg instanceof SystemMessage)?.content ?? '';
     const fixer = await model.invoke([
       new SystemMessage(
         'Return only valid JSON. No markdown, no extra text. Fix formatting issues and keep the schema.'
       ),
-      new HumanMessage(`Label: ${label}\n\n${response.content}`),
+      new HumanMessage(`SYSTEM PROMPT (SCHEMA):\n${systemHint}\n\nLabel: ${label}\n\n${content}`),
     ]);
     try {
       return extractJson(fixer.content);
@@ -455,7 +497,7 @@ const buildModels = (args) => {
 };
 
 const planPrompt = (input) => {
-  const system = `You are a senior Korean children's literature planner and editor specializing in read-aloud storybooks.\n\nRules:\n- Take time to think carefully before answering.\n- Purpose: create a high-quality read-aloud storybook text for children.\n- Write in Korean.\n- This is a read-aloud story. Do NOT rely on illustrations; the text must carry the story on its own.\n- Provide a canonical story_title used for all versions. Keep it stable and short.\n- Set version_title to the same as story_title unless the user explicitly requests a different title.\n- story_summary/version_summary must describe the story content only (no production notes like ‘낭독용/부작/각색/버전’).\n- Provide story_slug_en as lowercase ASCII kebab-case (e.g., alice-in-wonderland). No non-ASCII.\n- If mode is adapt, list characters and key events, decide whether to adapt or retell directly, and provide an adaptation plan.\n- adaptation_plan should only describe story changes (what to keep/cut/reshape) and key storytelling choices.\n- Keep adaptation_plan concise and story-focused; avoid listing moral lessons, teaching steps, or style checklists.\n- If mode is original, outline setting, characters, and theme; any educational intent should be subtle and story-first (emotional/experiential), not a checklist.\n- Choose length_type (short/medium/long/series). If series, decide episode_count and outline each episode with clear cut points.\n- For series, include per-episode summary and key beats only (no start/end/hook labels). Ensure episodes cover different events (no repetition).\n- Respect provided age range, length, or episode count unless it harms suitability.\n- Output ONLY valid JSON (no markdown, no commentary).\n\nOutput schema example:\n{\n  "mode": "original",\n  "source_story": "",\n  "adaptation_needed": false,\n  "adaptation_plan": "",\n  "story_title": "...",\n  "story_summary": "...",\n  "version_title": "...",\n  "version_summary": "...",\n  "story_slug_en": "alice-in-wonderland",\n  "target_age_range": "6-7",\n  "length_type": "short",\n  "episode_count": 1,\n  "tags": ["..."],\n  "characters": ["..."],\n  "setting": "...",\n  "themes": ["..."],\n  "plot_outline": ["..."],\n  "episode_outlines": [{\"episode\": 1, \"title\": \"...\", \"summary\": \"...\", \"beats\": [\"...\"]}],\n  "style_guide": "..."\n}`;
+  const system = `You are a senior Korean children's literature planner and editor specializing in read-aloud storybooks.\n\nRules:\n- Take time to think carefully before answering.\n- Purpose: create a high-quality read-aloud storybook text for children.\n- Write in Korean.\n- This is a read-aloud story. Do NOT rely on illustrations; the text must carry the story on its own.\n- Provide a canonical story_title used for all versions. Keep it stable and short.\n- Set version_title to the same as story_title unless the user explicitly requests a different title.\n- story_summary/version_summary must describe the story content only (no production notes like ‘낭독용/부작/각색/버전’).\n- Provide story_slug_en as lowercase ASCII kebab-case (e.g., alice-in-wonderland). No non-ASCII.\n- Do NOT include story_text, full draft text, or any long prose. Planning fields must stay short and single-line.\n- Do NOT include line breaks inside any string values.\n- Use ONLY the keys shown in the schema example; do not add extra keys.\n- If mode is adapt, list characters and key events, decide whether to adapt or retell directly, and provide an adaptation plan.\n- adaptation_plan should only describe story changes (what to keep/cut/reshape) and key storytelling choices.\n- Keep adaptation_plan concise and story-focused; avoid listing moral lessons, teaching steps, or style checklists.\n- If mode is original, outline setting, characters, and theme; any educational intent should be subtle and story-first (emotional/experiential), not a checklist.\n- Choose length_type (short/medium/long/series). If series, decide episode_count and outline each episode with clear cut points.\n- For series, include per-episode summary and key beats only (no start/end/hook labels). Ensure episodes cover different events (no repetition).\n- Respect provided age range, length, or episode count unless it harms suitability.\n- Output ONLY valid JSON (no markdown, no commentary).\n\nOutput schema example:\n{\n  "mode": "original",\n  "source_story": "",\n  "adaptation_needed": false,\n  "adaptation_plan": "",\n  "story_title": "...",\n  "story_summary": "...",\n  "version_title": "...",\n  "version_summary": "...",\n  "story_slug_en": "alice-in-wonderland",\n  "target_age_range": "6-7",\n  "length_type": "short",\n  "episode_count": 1,\n  "tags": ["..."],\n  "characters": ["..."],\n  "setting": "...",\n  "themes": ["..."],\n  "plot_outline": ["..."],\n  "episode_outlines": [{\"episode\": 1, \"title\": \"...\", \"summary\": \"...\", \"beats\": [\"...\"]}],\n  "style_guide": "..."\n}`;
 
   const payload = {
     title: input.title,
@@ -975,19 +1017,30 @@ const buildGraph = ({ planner, writer, reviewer }) => {
     }
 
     if (!lengthCheck.ok) {
-      normalizedReview.status = 'revise';
       const detail = `현재 길이(${lengthCheck.value}자)가 목표 범위(${lengthTarget.min}~${lengthTarget.max}자)를 벗어남.`;
-      normalizedReview.must_fix = Array.isArray(normalizedReview.must_fix)
-        ? [...normalizedReview.must_fix, detail]
-        : [detail];
       normalizedReview.issues = Array.isArray(normalizedReview.issues)
         ? normalizedReview.issues
         : [];
-      normalizedReview.issues.push({
-        type: 'length',
-        detail,
-        evidence: `char_count_no_space=${lengthCheck.value}`,
-      });
+      if (lengthCheck.severity === 'soft') {
+        normalizedReview.suggestions = Array.isArray(normalizedReview.suggestions)
+          ? [...normalizedReview.suggestions, detail]
+          : [detail];
+        normalizedReview.issues.push({
+          type: 'length',
+          detail: `${detail} (minor)`,
+          evidence: `char_count_no_space=${lengthCheck.value}`,
+        });
+      } else {
+        normalizedReview.status = 'revise';
+        normalizedReview.must_fix = Array.isArray(normalizedReview.must_fix)
+          ? [...normalizedReview.must_fix, detail]
+          : [detail];
+        normalizedReview.issues.push({
+          type: 'length',
+          detail,
+          evidence: `char_count_no_space=${lengthCheck.value}`,
+        });
+      }
     }
 
     return {
