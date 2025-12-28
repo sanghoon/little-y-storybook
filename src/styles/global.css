@@ -73,6 +73,11 @@ body {
   font-size: 14px;
 }
 
+.site-nav a.is-active {
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
 .page {
   flex: 1;
   padding: 24px 20px 40px;
@@ -170,6 +175,16 @@ body {
   background: rgba(208, 140, 96, 0.08);
 }
 
+.tag.more {
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid var(--accent);
+}
+
+.card .button:last-child {
+  margin-top: auto;
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -189,6 +204,41 @@ body {
   background: transparent;
   color: var(--accent-strong);
   border: 1px solid var(--accent);
+}
+
+.reading-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-card h1 {
+  margin: 4px 0 8px;
+}
+
+.reader-heading {
+  font-size: 26px;
+  line-height: 1.2;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--accent-strong);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.summary {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.info-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
 }
 
 .chip-row {
@@ -241,6 +291,63 @@ body {
   font-family: 'Gowun Dodum', sans-serif;
 }
 
+.reader-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+}
+
+.card-grid.compact {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.utility-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fold {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.fold summary {
+  cursor: pointer;
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  list-style: none;
+}
+
+.fold summary::-webkit-details-marker {
+  display: none;
+}
+
+.fold[open] {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+}
+
+.fold[open] summary {
+  color: var(--accent-strong);
+}
+
+.mini-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
 .reader-controls {
   display: flex;
   gap: 12px;
@@ -253,6 +360,10 @@ body {
   gap: 8px;
   font-size: 12px;
   font-family: 'Gowun Dodum', sans-serif;
+}
+
+.reader section[id^='chapter-'] {
+  scroll-margin-top: 96px;
 }
 
 .site-footer {
@@ -322,8 +433,8 @@ body {
 }
 
 .progress-bar {
-  height: 6px;
-  background: var(--accent);
+  height: 4px;
+  background: color-mix(in srgb, var(--accent) 85%, white 15%);
   border-radius: 999px;
   width: 0%;
   flex: 1;
@@ -364,6 +475,16 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
+@media (max-width: 1024px) {
+  .reader section[id^='chapter-'] {
+    scroll-margin-top: 72px;
+  }
+
+  .reader-toolbar {
+    position: static;
+  }
+}
+
 @media (max-width: 600px) {
   .site-header {
     flex-direction: column;
@@ -373,5 +494,9 @@ input:focus-visible {
 
   .page {
     padding: 20px 16px 32px;
+  }
+
+  .reader-toolbar {
+    position: static;
   }
 }

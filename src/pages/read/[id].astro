@@ -1,6 +1,6 @@
 ---
 import ReaderLayout from '../../layouts/ReaderLayout.astro';
-import { loadVersions } from '../../lib/content';
+import { loadVersions, getRelatedVersions } from '../../lib/content';
 
 export function getStaticPaths() {
   const versions = loadVersions();
@@ -15,86 +15,129 @@ if (!version) {
   throw new Error(`Version not found: ${id}`);
 }
 
+const related = getRelatedVersions(versions, version);
 const chapters = version.chapters ?? [];
 const isSeries = version.lengthType === 'series' && chapters.length > 0;
+const seriesEstimated = isSeries
+  ? chapters.reduce(
+      (total, chapter) => total + (chapter.estimatedReadTime ?? 0),
+      0
+    ) || undefined
+  : undefined;
 ---
 
-<ReaderLayout title={`${version.title} 읽기`} backHref={`/stories/${version.id}`}>
-  <section class="card">
-    <div class="section-header">
-      <h2>{version.title}</h2>
-      <p>{version.ageRange}세 · {version.lengthType}</p>
-    </div>
-  </section>
-
-  {isSeries && (
-    <section class="card">
-      <div class="section-header">
-        <h2>회차 목록</h2>
-        <p>원하는 회차부터 읽을 수 있어요.</p>
+<ReaderLayout title={`${version.title} 읽기`} backHref="/stories">
+  <div class="reading-layout">
+    <section class="card info-card">
+      <p class="eyebrow">이야기 정보</p>
+      <h1 class="reader-heading">{version.title}</h1>
+      <p class="summary">{version.summary}</p>
+      <div class="meta">
+        <span class="badge">{version.ageRange}세</span>
+        <span class="badge">{version.lengthType}</span>
+        {(seriesEstimated || version.estimatedReadTime) && (
+          <span class="badge">
+            예상 {seriesEstimated ?? version.estimatedReadTime}분
+          </span>
+        )}
       </div>
-      <div class="chip-row is-scroll" data-chapter-nav>
-        {chapters.map((chapter) => (
-          <a class="chip" href={`#chapter-${chapter.index}`} data-chapter-link>
-            {chapter.title}
-          </a>
+      <div class="tag-list">
+        {version.tags.map((tag) => (
+          <span class="tag">{tag}</span>
         ))}
       </div>
     </section>
-  )}
 
-  <section class="card">
-    <div class="section-header">
-      <h2>읽기 설정</h2>
-      <p>글자 크기를 조절할 수 있어요.</p>
-    </div>
-    <div class="reader-controls">
-      <label class="range">
-        글자 크기
-        <input type="range" min="16" max="24" value="18" data-font-size />
-      </label>
-    </div>
-  </section>
-
-  <div class="progress" data-progress>
-    <div class="progress-bar" data-progress-bar></div>
-    <span data-progress-label>0%</span>
-  </div>
-
-  <article
-    class="reader"
-    data-version-id={version.id}
-    data-title={version.title}
-    data-age={version.ageRange}
-    data-length={version.lengthType}
-    data-series={isSeries}
-  >
-    {isSeries ? (
-      chapters.map((chapter) => (
-        <section id={`chapter-${chapter.index}`} data-chapter-index={chapter.index}>
-          <h3>{chapter.title}</h3>
-          {chapter.estimatedReadTime && (
-            <p class="meta">예상 읽기 시간 {chapter.estimatedReadTime}분</p>
-          )}
-          <div set:html={chapter.html} />
-          <div class="chapter-nav">
-            {chapter.index > 1 && (
-              <a class="button secondary" href={`#chapter-${chapter.index - 1}`}>
-                이전 회차
-              </a>
-            )}
-            {chapter.index < chapters.length && (
-              <a class="button" href={`#chapter-${chapter.index + 1}`}>
-                다음 회차
-              </a>
-            )}
+    {(isSeries || true) && (
+      <section class="card utility-card">
+        {isSeries && (
+          <details class="fold" aria-label="회차 이동" open={false}>
+            <summary>회차 이동</summary>
+            <div class="chip-row is-scroll" data-chapter-nav>
+              {chapters.map((chapter) => (
+                <a class="chip" href={`#chapter-${chapter.index}`} data-chapter-link>
+                  {chapter.title}
+                </a>
+              ))}
+            </div>
+          </details>
+        )}
+        <details class="fold" aria-label="읽기 설정" open={false}>
+          <summary>읽기 설정</summary>
+          <div class="reader-controls">
+            <label class="range">
+              글자 크기
+              <input type="range" min="16" max="24" value="18" data-font-size />
+            </label>
           </div>
-        </section>
-      ))
-    ) : (
-      <div set:html={version.html} />
+        </details>
+      </section>
     )}
-  </article>
+
+    <div class="progress" data-progress>
+      <div class="progress-bar" data-progress-bar></div>
+      <span data-progress-label>0%</span>
+    </div>
+
+    <article
+      id="reader-start"
+      class="reader"
+      data-version-id={version.id}
+      data-title={version.title}
+      data-age={version.ageRange}
+      data-length={version.lengthType}
+      data-series={isSeries}
+    >
+      {isSeries ? (
+        chapters.map((chapter) => (
+          <section id={`chapter-${chapter.index}`} data-chapter-index={chapter.index}>
+            <h3>{chapter.title}</h3>
+            {chapter.estimatedReadTime && (
+              <p class="meta">예상 읽기 시간 {chapter.estimatedReadTime}분</p>
+            )}
+            <div set:html={chapter.html} />
+            <div class="chapter-nav">
+              {chapter.index > 1 && (
+                <a class="button secondary" href={`#chapter-${chapter.index - 1}`}>
+                  이전 회차
+                </a>
+              )}
+              {chapter.index < chapters.length && (
+                <a class="button" href={`#chapter-${chapter.index + 1}`}>
+                  다음 회차
+                </a>
+              )}
+            </div>
+          </section>
+        ))
+      ) : (
+        <div set:html={version.html} />
+      )}
+    </article>
+
+    {related.length > 0 && (
+      <section class="card">
+        <div class="section-header">
+          <h2>다른 버전</h2>
+          <p>연령/길이 다른 버전으로 바로 읽기</p>
+        </div>
+        <div class="card-grid compact">
+          {related.map((item) => (
+            <article class="mini-card">
+              <div>
+                <h3>{item.title}</h3>
+                <div class="meta">
+                  <span class="badge">{item.ageRange}세</span>
+                  <span class="badge">{item.lengthType}</span>
+                </div>
+              </div>
+              <a class="button secondary" href={`/read/${item.id}`}>읽기</a>
+            </article>
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
 
   <script is:inline>
     (() => {
@@ -234,9 +277,10 @@ const isSeries = version.lengthType === 'series' && chapters.length > 0;
     const updateProgress = () => {
       const scrollTop = window.scrollY;
       const docHeight = document.body.scrollHeight - window.innerHeight;
-      const progress = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0;
-      if (progressBar) progressBar.style.width = `${progress}%`;
-      if (progressLabel) progressLabel.textContent = `${Math.round(progress)}%`;
+      const raw = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0;
+      const formatted = raw <= 0 ? '시작 전' : `${Math.max(1, Math.round(raw))}%`;
+      if (progressBar) progressBar.style.width = `${raw}%`;
+      if (progressLabel) progressLabel.textContent = formatted;
     };
 
     window.addEventListener('scroll', updateProgress, { passive: true });

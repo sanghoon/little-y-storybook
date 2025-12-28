@@ -89,11 +89,14 @@ const tags = Array.from(
             <span class="badge">{version.lengthType}</span>
           </div>
           <div class="tag-list">
-            {version.tags.slice(0, 4).map((tag) => (
+            {version.tags.slice(0, 2).map((tag) => (
               <span class="tag">{tag}</span>
             ))}
+            {version.tags.length > 2 && (
+              <span class="tag more">+{version.tags.length - 2}</span>
+            )}
           </div>
-          <a class="button" href={`/stories/${version.id}`}>자세히 보기</a>
+          <a class="button" href={`/read/${version.id}`}>읽기</a>
         </article>
       ))}
     </div>
