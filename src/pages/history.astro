@@ -1,0 +1,72 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="읽기 기록">
+  <section class="history-panel">
+    <div class="section-header">
+      <h2>읽기 기록</h2>
+      <p>최근 10개의 이야기를 다시 찾아볼 수 있어요.</p>
+    </div>
+
+    <div class="history-list" data-history-list>
+      <div class="card history-empty" data-history-empty>
+        <h3>아직 읽은 기록이 없어요</h3>
+        <p>새로운 이야기를 찾아 읽어볼까요?</p>
+        <a class="button" href="/stories">이야기 고르기</a>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    const historyContainer = document.querySelector('[data-history-list]');
+    const emptyState = document.querySelector('[data-history-empty]');
+
+    const raw = localStorage.getItem('storybook:recent');
+    const recent = raw ? JSON.parse(raw) : [];
+
+    const formatDate = (value) => {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    };
+
+    if (recent.length && historyContainer) {
+      historyContainer.innerHTML = '';
+      recent.slice(0, 10).forEach((item) => {
+        const chapterHash =
+          item.length_type === 'series' && item.last_chapter_index
+            ? `#chapter-${item.last_chapter_index}`
+            : '';
+        const card = document.createElement('article');
+        card.className = 'history-card';
+        const lastReadAt = formatDate(item.last_read_at);
+        card.innerHTML = `
+          <div class="history-main">
+            <div class="history-title-row">
+              <h3>${item.title}</h3>
+              <span class="history-type">${item.length_type === 'series' ? '연작' : '단편'}</span>
+            </div>
+            <p class="history-note">${item.length_type === 'series' ? `마지막으로 읽은 회차: ${item.last_chapter_index ?? 1}화` : '단편 이야기'}</p>
+            <div class="history-meta">
+              <span class="badge">${item.age_range}세</span>
+              <span class="badge">${item.length_type}</span>
+            </div>
+          </div>
+          <div class="history-actions">
+            ${lastReadAt ? `<span class="history-date">${lastReadAt}</span>` : ''}
+            <a class="button" href="/read/${item.id}${chapterHash}">이어보기</a>
+          </div>
+        `;
+        historyContainer.appendChild(card);
+      });
+    } else if (emptyState) {
+      emptyState.style.display = 'block';
+    }
+  </script>
+</BaseLayout>

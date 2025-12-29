@@ -20,6 +20,7 @@
 - title_override (optional)
 - age_range (예: 3-5)
 - length_type (short/medium/long/series)
+- pipeline_version (생성 파이프라인 버전, optional)
 - estimated_read_time (추정치, 분 단위)
 - audio_url (optional, TTS 오디오 파일 URL)
 - body (본문, 연작형이 아닐 때)

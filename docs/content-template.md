@@ -10,6 +10,7 @@ title: 제목
 summary: 한 줄 소개
 age_range: 3-5 / 6-7 / 8-9
 length_type: short / medium / long / series
+pipeline_version: v1
 estimated_read_time: 4
 audio_url: https://.../audio.mp3
 tags: [선택 태그들]

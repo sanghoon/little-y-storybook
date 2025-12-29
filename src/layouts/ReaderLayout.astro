@@ -11,16 +11,60 @@ const { title = '읽기', backHref = '/stories' } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem('storybook:theme');
+          const prefersDark = window.matchMedia &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const theme = stored || (prefersDark ? 'dark' : 'light');
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.style.colorScheme = theme;
+        } catch (error) {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
   </head>
   <body class="reader-mode">
     <div class="app-shell">
       <header class="reader-header">
         <a class="reader-back" href={backHref}>← 돌아가기</a>
         <span class="reader-title">{title}</span>
+        <button class="theme-toggle" type="button" data-theme-toggle>
+          다크 모드
+        </button>
       </header>
       <main class="page reader-page">
         <slot />
       </main>
     </div>
+    <script is:inline>
+      (() => {
+        const toggles = document.querySelectorAll('[data-theme-toggle]');
+        const setTheme = (theme) => {
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.style.colorScheme = theme;
+          try {
+            localStorage.setItem('storybook:theme', theme);
+          } catch (error) {
+            console.warn('테마 저장에 실패했습니다.', error);
+          }
+          toggles.forEach((button) => {
+            button.textContent = theme === 'dark' ? '라이트 모드' : '다크 모드';
+            button.setAttribute('aria-pressed', String(theme === 'dark'));
+          });
+        };
+
+        const currentTheme = document.documentElement.dataset.theme || 'light';
+        setTheme(currentTheme);
+        toggles.forEach((button) => {
+          button.addEventListener('click', () => {
+            const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            setTheme(next);
+          });
+        });
+      })();
+    </script>
   </body>
 </html>

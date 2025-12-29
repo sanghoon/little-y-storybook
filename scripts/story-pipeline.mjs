@@ -12,6 +12,8 @@ const DEFAULT_MODEL = process.env.STORY_MODEL ?? 'gpt-5.2';
 const DEFAULT_REASONING_EFFORT = process.env.REASONING_EFFORT ?? 'medium';
 const DEFAULT_PLAN_MAX_ITERATIONS = Number(process.env.PLAN_MAX_ITERATIONS ?? 2);
 const DEFAULT_MIN_ITERATIONS = Number(process.env.MIN_REVIEW_ITERATIONS ?? 2);
+// Bump this when prompts or pipeline logic change materially.
+const PIPELINE_VERSION = 'v1';
 const CONTENT_DIR = path.resolve(process.cwd(), 'content', 'versions');
 const PIPELINE_DIR = path.resolve(process.cwd(), 'pipeline');
 const PIPELINE_META_DIR = path.join(PIPELINE_DIR, 'meta');
@@ -44,6 +46,9 @@ Options:
   --dry-run                   Skip writing output
   --no-tracing                Disable LangChain tracing even if env is set
   --help                      Show this help
+
+Pipeline:
+  pipeline_version: ${PIPELINE_VERSION}
 `;
 
 const BOOLEAN_FLAGS = new Set([
@@ -1288,6 +1293,7 @@ const assembleMarkdown = ({ plan, drafts, storyId, metaPath, lengthStats, readTi
     `summary: ${escapeYaml(plan.version_summary || plan.story_summary || plan.summary || '')}`,
     `age_range: ${escapeYaml(plan.target_age_range || '')}`,
     `length_type: ${escapeYaml(plan.length_type || 'short')}`,
+    `pipeline_version: ${escapeYaml(PIPELINE_VERSION)}`,
     totalReadTime ? `estimated_read_time: ${totalReadTime}` : null,
     lengthStats ? `actual_char_count: ${lengthStats.char_count_no_space}` : null,
     lengthStats ? `actual_word_count: ${lengthStats.word_count}` : null,
@@ -1502,6 +1508,7 @@ const run = async () => {
       generated_at: new Date().toISOString(),
       model: args.model,
       reasoning_effort: DEFAULT_REASONING_EFFORT,
+      pipeline_version: PIPELINE_VERSION,
       input: {
         title: args.title,
         story_title: args.storyTitle,

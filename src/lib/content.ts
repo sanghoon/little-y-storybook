@@ -22,6 +22,7 @@ export type Version = {
   markdown: string;
   html: string;
   chapters?: Chapter[];
+  pipelineVersion?: string;
   slug: string;
 };
 
@@ -41,6 +42,11 @@ const toNumber = (value: unknown): number | undefined => {
   if (value === undefined || value === null || value === '') return undefined;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+const toString = (value: unknown): string | undefined => {
+  if (value === undefined || value === null || value === '') return undefined;
+  return String(value);
 };
 
 const stripMarkdown = (markdown: string) =>
@@ -105,6 +111,7 @@ export const loadVersions = (): Version[] => {
     const html = marked.parse(markdown);
     const lengthType = String(data.length_type ?? 'short');
     const isSeries = lengthType === 'series';
+    const pipelineVersion = toString(data.pipeline_version);
 
     return {
       id: String(data.id ?? ''),
@@ -117,6 +124,7 @@ export const loadVersions = (): Version[] => {
       markdown,
       html,
       chapters: isSeries ? parseChapters(markdown) : undefined,
+      pipelineVersion,
       slug: file.replace(/\.md$/, ''),
     } satisfies Version;
   });

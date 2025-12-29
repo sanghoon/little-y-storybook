@@ -4,6 +4,15 @@ import { loadVersions, getExcerpt } from '../lib/content';
 
 const versions = loadVersions();
 const recommended = versions.slice(0, 6);
+const recommendedPayload = versions.map((version) => ({
+  id: version.id,
+  title: version.title,
+  ageRange: version.ageRange,
+  lengthType: version.lengthType,
+  tags: version.tags,
+  excerpt: getExcerpt(version, 90),
+  chaptersCount: version.chapters?.length ?? 0,
+}));
 ---
 
 <BaseLayout title="Little Y Storybook">
@@ -23,11 +32,17 @@ const recommended = versions.slice(0, 6);
       <button class="button" type="submit">검색</button>
     </form>
 
-    <div class="card-grid" data-recent-list>
-      <div class="card" data-recent-empty>
-        <h3>최근 읽은 이야기가 없어요</h3>
-        <p>먼저 한 편을 골라 읽어볼까요?</p>
-        <a class="button" href="/stories">전체 이야기 보러가기</a>
+    <div class="recent-panel">
+      <div class="recent-header">
+        <h3>최근 읽은 이야기</h3>
+        <a class="button secondary" href="/history">읽기 기록 보기</a>
+      </div>
+      <div class="card-grid compact" data-recent-list>
+        <div class="card" data-recent-empty>
+          <h3>최근 읽은 이야기가 없어요</h3>
+          <p>먼저 한 편을 골라 읽어볼까요?</p>
+          <a class="button" href="/stories">전체 이야기 보러가기</a>
+        </div>
       </div>
     </div>
   </section>
@@ -37,27 +52,54 @@ const recommended = versions.slice(0, 6);
       <h2>추천 이야기</h2>
       <p>따뜻한 이야기로 하루를 마무리해요.</p>
     </div>
-    <div class="card-grid">
-      {recommended.map((version) => (
-        <article class="card">
-          <h3>{version.title}</h3>
-          <p>{getExcerpt(version, 90)}</p>
-          <div class="meta">
-            <span class="badge">{version.ageRange}세</span>
-            <span class="badge">{version.lengthType}</span>
-          </div>
-          <div class="tag-list">
-            {version.tags.slice(0, 2).map((tag) => (
-              <span class="tag">{tag}</span>
-            ))}
-            {version.tags.length > 2 && (
-              <span class="tag more">+{version.tags.length - 2}</span>
-            )}
-          </div>
-          <a class="button" href={`/read/${version.id}`}>읽기</a>
-        </article>
-      ))}
+    <div class="card-grid" data-recommended-grid>
+      {recommended.map((version) => {
+        const visibleTags = version.tags.slice(0, 4);
+        const hiddenTags = version.tags.slice(4);
+        const chaptersCount = version.chapters?.length ?? 0;
+        const showChapters = version.lengthType === 'series' && chaptersCount > 0;
+        return (
+          <article class="card">
+            <h3>{version.title}</h3>
+            <p>{getExcerpt(version, 90)}</p>
+            <div class="meta">
+              <span class="badge">{version.ageRange}세</span>
+              <span class="badge">{version.lengthType}</span>
+              {showChapters && <span class="badge">총 {chaptersCount}화</span>}
+            </div>
+            <div
+              class="tag-list"
+              data-tag-list={hiddenTags.length ? 'true' : undefined}
+              data-expanded={hiddenTags.length ? 'false' : undefined}
+            >
+              {visibleTags.map((tag) => (
+                <span class="tag">{tag}</span>
+              ))}
+              {hiddenTags.map((tag) => (
+                <span class="tag is-hidden">{tag}</span>
+              ))}
+              {hiddenTags.length > 0 && (
+                <button
+                  class="tag more"
+                  type="button"
+                  data-tag-toggle
+                  data-more-count={hiddenTags.length}
+                  aria-expanded="false"
+                >
+                  +{hiddenTags.length}
+                </button>
+              )}
+            </div>
+            <a class="button" href={`/read/${version.id}`}>읽기</a>
+          </article>
+        );
+      })}
     </div>
+    <script
+      type="application/json"
+      data-recommended-source
+      set:html={JSON.stringify(recommendedPayload).replace(/</g, '\\u003c')}
+    ></script>
   </section>
 
   <section>
@@ -86,19 +128,21 @@ const recommended = versions.slice(0, 6);
 
     if (recent.length && recentContainer) {
       recentContainer.innerHTML = '';
-      recent.slice(0, 5).forEach((item) => {
+      recent.slice(0, 1).forEach((item) => {
         const chapterHash =
           item.length_type === 'series' && item.last_chapter_index
             ? `#chapter-${item.last_chapter_index}`
             : '';
         const card = document.createElement('article');
-        card.className = 'card';
+        card.className = 'mini-card recent-card';
         card.innerHTML = `
-          <h3>${item.title}</h3>
-          <p>${item.length_type === 'series' ? `마지막으로 읽은 회차: ${item.last_chapter_index ?? 1}화` : '단편 이야기'}</p>
-          <div class="meta">
-            <span class="badge">${item.age_range}세</span>
-            <span class="badge">${item.length_type}</span>
+          <div class="recent-info">
+            <h3>${item.title}</h3>
+            <p>${item.length_type === 'series' ? `마지막으로 읽은 회차: ${item.last_chapter_index ?? 1}화` : '단편 이야기'}</p>
+            <div class="meta">
+              <span class="badge">${item.age_range}세</span>
+              <span class="badge">${item.length_type}</span>
+            </div>
           </div>
           <a class="button" href="/read/${item.id}${chapterHash}">이어보기</a>
         `;
@@ -106,6 +150,101 @@ const recommended = versions.slice(0, 6);
       });
     } else if (emptyState) {
       emptyState.style.display = 'block';
+    }
+
+    const recommendedGrid = document.querySelector('[data-recommended-grid]');
+    const recommendedSource = document.querySelector('[data-recommended-source]');
+    if (recommendedGrid && recommendedSource?.textContent) {
+      try {
+        const raw = JSON.parse(recommendedSource.textContent);
+        if (Array.isArray(raw) && raw.length) {
+          const shuffled = raw
+            .map((item) => ({ item, sort: Math.random() }))
+            .sort((a, b) => a.sort - b.sort)
+            .map(({ item }) => item);
+          const picks = shuffled.slice(0, 6);
+          recommendedGrid.innerHTML = '';
+
+          const createTagList = (tags = []) => {
+            const tagList = document.createElement('div');
+            tagList.className = 'tag-list';
+            const visible = tags.slice(0, 4);
+            const hidden = tags.slice(4);
+            if (hidden.length) {
+              tagList.dataset.tagList = 'true';
+              tagList.dataset.expanded = 'false';
+            }
+            visible.forEach((tag) => {
+              const span = document.createElement('span');
+              span.className = 'tag';
+              span.textContent = tag;
+              tagList.appendChild(span);
+            });
+            hidden.forEach((tag) => {
+              const span = document.createElement('span');
+              span.className = 'tag is-hidden';
+              span.textContent = tag;
+              tagList.appendChild(span);
+            });
+            if (hidden.length) {
+              const button = document.createElement('button');
+              button.type = 'button';
+              button.className = 'tag more';
+              button.dataset.tagToggle = 'true';
+              button.dataset.moreCount = String(hidden.length);
+              button.setAttribute('aria-expanded', 'false');
+              button.textContent = `+${hidden.length}`;
+              tagList.appendChild(button);
+            }
+            return tagList;
+          };
+
+          picks.forEach((version) => {
+            const article = document.createElement('article');
+            article.className = 'card';
+
+            const title = document.createElement('h3');
+            title.textContent = version.title;
+
+            const excerpt = document.createElement('p');
+            excerpt.textContent = version.excerpt;
+
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+            const age = document.createElement('span');
+            age.className = 'badge';
+            age.textContent = `${version.ageRange}세`;
+            const length = document.createElement('span');
+            length.className = 'badge';
+            length.textContent = version.lengthType;
+            meta.appendChild(age);
+            meta.appendChild(length);
+            if (version.lengthType === 'series' && version.chaptersCount) {
+              const chapters = document.createElement('span');
+              chapters.className = 'badge';
+              chapters.textContent = `총 ${version.chaptersCount}화`;
+              meta.appendChild(chapters);
+            }
+
+            const tagList = createTagList(version.tags);
+
+            const link = document.createElement('a');
+            link.className = 'button';
+            link.href = `/read/${version.id}`;
+            link.textContent = '읽기';
+
+            article.appendChild(title);
+            article.appendChild(excerpt);
+            article.appendChild(meta);
+            article.appendChild(tagList);
+            article.appendChild(link);
+
+            recommendedGrid.appendChild(article);
+          });
+        }
+      } catch (error) {
+        console.warn('추천 이야기를 불러오는 중 문제가 발생했습니다.', error);
+      }
     }
   </script>
 </BaseLayout>

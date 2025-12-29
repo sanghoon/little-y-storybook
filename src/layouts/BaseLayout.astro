@@ -28,6 +28,20 @@ const metaDescription =
     <meta name="twitter:card" content="summary_large_image" />
     {image && <meta name="twitter:image" content={image} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem('storybook:theme');
+          const prefersDark = window.matchMedia &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const theme = stored || (prefersDark ? 'dark' : 'light');
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.style.colorScheme = theme;
+        } catch (error) {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
   </head>
   <body>
     <div class="app-shell">
@@ -36,16 +50,28 @@ const metaDescription =
           <a href="/">Little Y Storybook</a>
           <span>잠들기 전, 한 편의 이야기</span>
         </div>
-        <nav class="site-nav">
-          <a href="/" class={isActive('/') ? 'is-active' : ''} aria-current={isActive('/') ? 'page' : undefined}>홈</a>
-          <a
-            href="/stories"
-            class={isActive('/stories') ? 'is-active' : ''}
-            aria-current={isActive('/stories') ? 'page' : undefined}
-          >
-            전체 이야기
-          </a>
-        </nav>
+        <div class="header-actions">
+          <nav class="site-nav">
+            <a href="/" class={isActive('/') ? 'is-active' : ''} aria-current={isActive('/') ? 'page' : undefined}>홈</a>
+            <a
+              href="/stories"
+              class={isActive('/stories') ? 'is-active' : ''}
+              aria-current={isActive('/stories') ? 'page' : undefined}
+            >
+              전체 이야기
+            </a>
+            <a
+              href="/history"
+              class={isActive('/history') ? 'is-active' : ''}
+              aria-current={isActive('/history') ? 'page' : undefined}
+            >
+              읽기 기록
+            </a>
+          </nav>
+          <button class="theme-toggle" type="button" data-theme-toggle>
+            다크 모드
+          </button>
+        </div>
       </header>
 
       <main class="page">
@@ -56,5 +82,45 @@ const metaDescription =
         <p>작은 이야기들이 모여 큰 꿈이 됩니다.</p>
       </footer>
     </div>
+    <script is:inline>
+      (() => {
+        const toggles = document.querySelectorAll('[data-theme-toggle]');
+        const setTheme = (theme) => {
+          document.documentElement.dataset.theme = theme;
+          document.documentElement.style.colorScheme = theme;
+          try {
+            localStorage.setItem('storybook:theme', theme);
+          } catch (error) {
+            console.warn('테마 저장에 실패했습니다.', error);
+          }
+          toggles.forEach((button) => {
+            button.textContent = theme === 'dark' ? '라이트 모드' : '다크 모드';
+            button.setAttribute('aria-pressed', String(theme === 'dark'));
+          });
+        };
+
+        const currentTheme = document.documentElement.dataset.theme || 'light';
+        setTheme(currentTheme);
+        toggles.forEach((button) => {
+          button.addEventListener('click', () => {
+            const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            setTheme(next);
+          });
+        });
+
+        document.addEventListener('click', (event) => {
+          const button = event.target.closest('[data-tag-toggle]');
+          if (!button) return;
+          const list = button.closest('[data-tag-list]');
+          if (!list) return;
+          const expanded = list.dataset.expanded === 'true';
+          const nextExpanded = expanded ? 'false' : 'true';
+          list.dataset.expanded = nextExpanded;
+          button.setAttribute('aria-expanded', String(!expanded));
+          const count = button.dataset.moreCount || '';
+          button.textContent = expanded ? `+${count}` : '접기';
+        });
+      })();
+    </script>
   </body>
 </html>

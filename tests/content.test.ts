@@ -19,4 +19,13 @@ describe('content loader', () => {
     expect(chapters[0].title).toBeTruthy();
     expect(chapters[0].estimatedReadTime).toBeTypeOf('number');
   });
+
+  it('allows missing pipeline_version in legacy content', () => {
+    const versions = loadVersions();
+    expect(versions.some((version) => version.pipelineVersion === undefined)).toBe(true);
+    const withPipeline = versions.find((version) => version.pipelineVersion);
+    if (withPipeline) {
+      expect(withPipeline.pipelineVersion).toBeTypeOf('string');
+    }
+  });
 });
