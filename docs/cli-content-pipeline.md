@@ -58,3 +58,10 @@ tags: ["...", "..."]
 - estimated_read_time: 4
 본문...
 ```
+
+## 검증 스크립트
+생성된 콘텐츠와 `content/stories.yml`의 정합성을 검사합니다.
+
+```bash
+npm run validate:content
+```

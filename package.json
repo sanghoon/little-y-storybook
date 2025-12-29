@@ -8,7 +8,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest run",
-    "generate:story": "node scripts/story-pipeline.mjs"
+    "generate:story": "node scripts/story-pipeline.mjs",
+    "validate:content": "node scripts/validate-content.mjs"
   },
   "dependencies": {
     "@langchain/core": "^1.1.7",
