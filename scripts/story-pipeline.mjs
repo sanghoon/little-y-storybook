@@ -301,6 +301,12 @@ const findListenerPromptSample = (text) => {
   return '';
 };
 
+const getStyleSample = (text, maxChars = 260) => {
+  const source = String(text ?? '').trim();
+  if (!source) return '';
+  return source.slice(0, maxChars);
+};
+
 const aggregateLengthMetrics = (episodeMeta) => {
   const metrics = (episodeMeta ?? []).map((item) => item.length_metrics).filter(Boolean);
   if (metrics.length === 0) return null;
@@ -505,7 +511,10 @@ const buildModels = (args) => {
 };
 
 const planPrompt = (input) => {
-  const system = `You are a senior Korean children's literature planner and editor specializing in read-aloud storybooks.\n\nRules:\n- Take time to think carefully before answering.\n- Purpose: create a high-quality read-aloud storybook text for children.\n- Write in Korean.\n- This is a read-aloud story. Do NOT rely on illustrations; the text must carry the story on its own.\n- Provide a canonical story_title used for all versions. Keep it stable and short.\n- Set version_title to the same as story_title unless the user explicitly requests a different title.\n- story_summary/version_summary must describe the story content only (no production notes like ‘낭독용/부작/각색/버전’).\n- Provide story_slug_en as lowercase ASCII kebab-case (e.g., alice-in-wonderland). No non-ASCII.\n- Do NOT include story_text, full draft text, or any long prose. Planning fields must stay short and single-line.\n- Do NOT include line breaks inside any string values.\n- Use ONLY the keys shown in the schema example; do not add extra keys.\n- If mode is adapt, list characters and key events, decide whether to adapt or retell directly, and provide an adaptation plan.\n- adaptation_plan should only describe story changes (what to keep/cut/reshape) and key storytelling choices.\n- Keep adaptation_plan concise and story-focused; avoid listing moral lessons, teaching steps, or style checklists.\n- If mode is original, outline setting, characters, and theme; any educational intent should be subtle and story-first (emotional/experiential), not a checklist.\n- Choose length_type (short/medium/long/series). If series, decide episode_count and outline each episode with clear cut points.\n- For series, include per-episode summary and key beats only (no start/end/hook labels). Ensure episodes cover different events (no repetition).\n- Respect provided age range, length, or episode count unless it harms suitability.\n- Output ONLY valid JSON (no markdown, no commentary).\n\nOutput schema example:\n{\n  "mode": "original",\n  "source_story": "",\n  "adaptation_needed": false,\n  "adaptation_plan": "",\n  "story_title": "...",\n  "story_summary": "...",\n  "version_title": "...",\n  "version_summary": "...",\n  "story_slug_en": "alice-in-wonderland",\n  "target_age_range": "6-7",\n  "length_type": "short",\n  "episode_count": 1,\n  "tags": ["..."],\n  "characters": ["..."],\n  "setting": "...",\n  "themes": ["..."],\n  "plot_outline": ["..."],\n  "episode_outlines": [{\"episode\": 1, \"title\": \"...\", \"summary\": \"...\", \"beats\": [\"...\"]}],\n  "style_guide": "..."\n}`;
+  const system = `You are a senior Korean children's literature planner and editor specializing in read-aloud storybooks.\n\nRules:\n- Take time to think carefully before answering.\n- Purpose: create a high-quality read-aloud storybook text for children.\n- Write in Korean.\n- This is a read-aloud story. Do NOT rely on illustrations; the text must carry the story on its own.\n- Provide a canonical story_title used for all versions. Keep it stable and short.\n- Set version_title to the same as story_title unless the user explicitly requests a different title.\n- story_summary/version_summary must describe the story content only (no production notes like ‘낭독용/부작/각색/버전’).\n- Provide story_slug_en as lowercase ASCII kebab-case (e.g., alice-in-wonderland). No non-ASCII.\n- Do NOT include story_text, full draft text, or any long prose. Planning fields must stay short and single-line.\n- Do NOT include line breaks inside any string values.\n- Use ONLY the keys shown in the schema example; do not add extra keys.
+- Use tags from this pool when applicable: 고전각색, 전래동화, 신화, 창작동화, 판타지, 모험, 우정, 성장, 가족, 용기, 마법, 동물, 음악, 유머, 나눔, 희생, 정직, 자존감, 자기이해, 협동, 재치, 지혜, 귀향, 공주, 편견극복, 보은, 의인화.\n- If mode is adapt, list characters and key events, decide whether to adapt or retell directly, and provide an adaptation plan.
+- If mode is adapt and it is not a parody/major reinterpretation, keep story_title the same as the source_story title.\n- adaptation_plan should only describe story changes (what to keep/cut/reshape) and key storytelling choices.\n- Keep adaptation_plan concise and story-focused; avoid listing moral lessons, teaching steps, or style checklists.\n- If mode is original, outline setting, characters, and theme; any educational intent should be subtle and story-first (emotional/experiential), not a checklist.\n- Choose length_type (short/medium/long/series). If series, decide episode_count and outline each episode with clear cut points.\n- For series, include per-episode summary and key beats only (no start/end/hook labels). Ensure episodes cover different events (no repetition).
+- Define a clear, consistent style_guide (narrator voice, tense, sentence rhythm, dialogue style) that must be kept across all episodes.\n- Respect provided age range, length, or episode count unless it harms suitability.\n- Output ONLY valid JSON (no markdown, no commentary).\n\nOutput schema example:\n{\n  "mode": "original",\n  "source_story": "",\n  "adaptation_needed": false,\n  "adaptation_plan": "",\n  "story_title": "...",\n  "story_summary": "...",\n  "version_title": "...",\n  "version_summary": "...",\n  "story_slug_en": "alice-in-wonderland",\n  "target_age_range": "6-7",\n  "length_type": "short",\n  "episode_count": 1,\n  "tags": ["..."],\n  "characters": ["..."],\n  "setting": "...",\n  "themes": ["..."],\n  "plot_outline": ["..."],\n  "episode_outlines": [{\"episode\": 1, \"title\": \"...\", \"summary\": \"...\", \"beats\": [\"...\"]}],\n  "style_guide": "..."\n}`;
 
   const payload = {
     title: input.title,
@@ -568,8 +577,9 @@ const planRevisePrompt = ({ plan, review, input }) => {
   return [new SystemMessage(system), new HumanMessage(human)];
 };
 
-const draftPrompt = ({ plan, episodeIndex, episodeCount, isFinal, lengthTarget }) => {
-  const system = `You are a Korean children's story writer for read-aloud storybooks.\n\nRules:\n- Take time to think carefully before answering.\n- Purpose: produce a high-quality read-aloud storybook text.\n- Write natural, vivid Korean with no translation-like phrasing.\n- Keep sentences smooth, age-appropriate, and emotionally warm.\n- Follow the plan strictly; avoid 플랜 이탈 from the story's premise, characters, or events.\n- Do NOT introduce new main characters or settings unless explicitly listed in the plan.\n- This is for read-aloud. Do NOT rely on illustrations or visual-only cues.\n- Do NOT include titles, headings, or metadata. Return only the story text.\n- Avoid frequent direct prompts to the listener (e.g., ‘우리도 해봐요’). Keep narration-focused.\n- If this is not the final episode, you may end with a gentle continuation only if it fits naturally; avoid forced hooks or cliffhangers.\n- Avoid slang, forced rhymes, and awkward expressions.\n- Light, natural repetition or a gentle refrain is allowed if it helps read-aloud rhythm.\n- Avoid didactic or list-like teaching; show lessons through actions and dialogue.\n- Do NOT over-simplify vocabulary; use a natural children’s literature tone.\n- Keep length within the target range when possible.\n\nQuality bar:\n- Read-aloud friendly rhythm and pacing.\n- Clear cause-effect flow.\n- Use occasional patterned phrasing or small refrains to support read-aloud cadence; avoid overuse.\n- No sudden scene jumps unless noted in the plan.`;
+const draftPrompt = ({ plan, episodeIndex, episodeCount, isFinal, lengthTarget, styleReference, previousEpisodeText }) => {
+  const system = `You are a Korean children's story writer for read-aloud storybooks.\n\nRules:\n- Take time to think carefully before answering.\n- Purpose: produce a high-quality read-aloud storybook text.\n- Write natural, vivid Korean with no translation-like phrasing.\n- Keep sentences smooth, age-appropriate, and emotionally warm.\n- Follow the plan strictly; avoid 플랜 이탈 from the story's premise, characters, or events.\n- Do NOT introduce new main characters or settings unless explicitly listed in the plan.\n- This is for read-aloud. Do NOT rely on illustrations or visual-only cues.\n- Do NOT include titles, headings, or metadata. Return only the story text.\n- Avoid frequent direct prompts to the listener (e.g., ‘우리도 해봐요’). Keep narration-focused.\n- If this is not the final episode, you may end with a gentle continuation only if it fits naturally; avoid forced hooks or cliffhangers.\n- Avoid slang, forced rhymes, and awkward expressions.\n- Light, natural repetition or a gentle refrain is allowed if it helps read-aloud rhythm.\n- Avoid didactic or list-like teaching; show lessons through actions and dialogue.\n- Do NOT over-simplify vocabulary; use a natural children’s literature tone.\n- Keep length within the target range when possible.
+- Follow the style_guide strictly; keep tone and voice consistent with prior episodes.\n\nQuality bar:\n- Read-aloud friendly rhythm and pacing.\n- Clear cause-effect flow.\n- Use occasional patterned phrasing or small refrains to support read-aloud cadence; avoid overuse.\n- No sudden scene jumps unless noted in the plan.`;
 
   const outline = plan.episode_outlines?.[episodeIndex - 1] ?? {};
   const human = `FULL PLAN (FOLLOW EXACTLY):\n"""\n${JSON.stringify(
@@ -591,16 +601,24 @@ const draftPrompt = ({ plan, episodeIndex, episodeCount, isFinal, lengthTarget }
       episode_outline: outline,
       length_target: lengthTarget,
       is_final_episode: isFinal,
+      style_reference: styleReference,
     },
     null,
     2
   )}\n"""`;
 
-  return [new SystemMessage(system), new HumanMessage(human)];
+  const previousEpisode =
+    episodeIndex > 1 ? (previousEpisodeText ?? '') : '';
+  const prevBlock = previousEpisode
+    ? `\n\nPREVIOUS EPISODE (REFERENCE ONLY, DO NOT REWRITE):\n"""\n${previousEpisode}\n"""`
+    : '';
+
+  return [new SystemMessage(system), new HumanMessage(human + prevBlock)];
 };
 
-const reviewPrompt = ({ plan, draft, episodeIndex, episodeCount, lengthMetrics, lengthTarget }) => {
-  const system = `You are a veteran Korean children's book editor and read-aloud specialist.\n\nRules:\n- Take time to think carefully before answering.\n- Purpose: evaluate and refine the draft into a high-quality read-aloud storybook text.\n- Review for consistency, flow, sentence quality, grammar, spelling, and age appropriateness.\n- This must be readable aloud with natural rhythm; translation-like or awkward phrasing is NOT acceptable.\n- Do NOT invent problems; if unsure, do not flag it.\n- Do NOT demand overly simplistic or babyish vocabulary; keep a natural children’s literature tone.\n- This is not a picture book; the text must stand on its own.\n- Avoid didactic, checklist-style teaching; the lesson should feel woven into the story.\n- Flag excessive direct prompts to the listener (e.g., 반복되는 ‘우리도/함께’ 지시).\n- Avoid nitpicking; only flag issues that affect read-aloud quality or story clarity.\n- Check length against the provided target and request adjustments if too short/long.\n- Verify the draft follows the plan: characters, setting, and outlined events. Detect 플랜 이탈.\n- When you flag an issue, include a short evidence snippet (<=12 words) from the draft. If you cannot cite evidence, do NOT flag it.\n- If any major issue exists, status must be "revise".\n- All fields are required. If none, use null or empty arrays/empty strings.\n- Output ONLY valid JSON (no markdown, no commentary).\n\nOutput schema example:\n{\n  \"status\": \"pass\",\n  \"issues\": [{\"type\": \"consistency\", \"detail\": \"...\", \"evidence\": \"...\"}],\n  \"must_fix\": [],\n  \"suggestions\": [],\n  \"plan_alignment\": {\n    \"characters_ok\": true,\n    \"setting_ok\": true,\n    \"outline_covered\": true,\n    \"plan_deviation\": false,\n    \"notes\": \"\"\n  }\n}`;
+const reviewPrompt = ({ plan, draft, episodeIndex, episodeCount, lengthMetrics, lengthTarget, styleReference }) => {
+  const system = `You are a veteran Korean children's book editor and read-aloud specialist.\n\nRules:\n- Take time to think carefully before answering.\n- Purpose: evaluate and refine the draft into a high-quality read-aloud storybook text.\n- Review for consistency, flow, sentence quality, grammar, spelling, and age appropriateness.\n- This must be readable aloud with natural rhythm; translation-like or awkward phrasing is NOT acceptable.\n- Do NOT invent problems; if unsure, do not flag it.\n- Do NOT demand overly simplistic or babyish vocabulary; keep a natural children’s literature tone.\n- This is not a picture book; the text must stand on its own.\n- Avoid didactic, checklist-style teaching; the lesson should feel woven into the story.\n- Flag excessive direct prompts to the listener (e.g., 반복되는 ‘우리도/함께’ 지시).\n- Avoid nitpicking; only flag issues that affect read-aloud quality or story clarity.\n- Check length against the provided target. Only flag it if it is significantly outside the range.\n- Verify the draft follows the plan: characters, setting, and outlined events. Detect 플랜 이탈.
+- Ensure the draft matches the style_guide and is consistent with the style_reference.\n- When you flag an issue, include a short evidence snippet (<=12 words) from the draft. If you cannot cite evidence, do NOT flag it.\n- If any major issue exists, status must be "revise".\n- All fields are required. If none, use null or empty arrays/empty strings.\n- Output ONLY valid JSON (no markdown, no commentary).\n\nOutput schema example:\n{\n  \"status\": \"pass\",\n  \"issues\": [{\"type\": \"consistency\", \"detail\": \"...\", \"evidence\": \"...\"}],\n  \"must_fix\": [],\n  \"suggestions\": [],\n  \"plan_alignment\": {\n    \"characters_ok\": true,\n    \"setting_ok\": true,\n    \"outline_covered\": true,\n    \"plan_deviation\": false,\n    \"notes\": \"\"\n  }\n}`;
 
   const human = `CONTEXT:\n"""\n${JSON.stringify(
     {
@@ -616,6 +634,7 @@ const reviewPrompt = ({ plan, draft, episodeIndex, episodeCount, lengthMetrics, 
       length_target: lengthTarget,
       length_metrics: lengthMetrics,
       style_guide: plan.style_guide,
+      style_reference: styleReference,
       adaptation_plan: plan.adaptation_plan,
     },
     null,
@@ -1027,6 +1046,12 @@ const buildGraph = ({ planner, writer, reviewer }) => {
     const episodeIndex = state.episodeIndex ?? 1;
     const episodeCount = state.episodeCount ?? 1;
     const isFinal = episodeIndex === episodeCount;
+    const previousEpisodeText = episodeIndex > 1
+      ? (state.drafts ?? [])[episodeIndex - 2]
+      : '';
+    const styleReference = episodeIndex > 1
+      ? getStyleSample(previousEpisodeText)
+      : '';
     const lengthTarget = getLengthTarget(
       state.plan?.target_age_range,
       state.plan?.length_type
@@ -1038,6 +1063,8 @@ const buildGraph = ({ planner, writer, reviewer }) => {
         episodeCount,
         isFinal,
         lengthTarget,
+        styleReference,
+        previousEpisodeText,
       })
     );
     return {
@@ -1049,6 +1076,9 @@ const buildGraph = ({ planner, writer, reviewer }) => {
   graph.addNode('review_step', async (state) => {
     const episodeIndex = state.episodeIndex ?? 1;
     const episodeCount = state.episodeCount ?? 1;
+    const styleReference = episodeIndex > 1
+      ? getStyleSample((state.drafts ?? [])[episodeIndex - 2])
+      : '';
     const lengthTarget = getLengthTarget(
       state.plan?.target_age_range,
       state.plan?.length_type
@@ -1065,6 +1095,7 @@ const buildGraph = ({ planner, writer, reviewer }) => {
               episodeCount,
               lengthMetrics,
               lengthTarget,
+              styleReference,
             })
           )
       : await invokeJson(
@@ -1076,6 +1107,7 @@ const buildGraph = ({ planner, writer, reviewer }) => {
             episodeCount,
             lengthMetrics,
             lengthTarget,
+            styleReference,
           }),
           'review',
           ReviewSchema
@@ -1125,31 +1157,20 @@ const buildGraph = ({ planner, writer, reviewer }) => {
       });
     }
 
-    if (!lengthCheck.ok) {
+    if (!lengthCheck.ok && lengthCheck.severity !== 'soft') {
       const detail = `현재 길이(${lengthCheck.value}자)가 목표 범위(${lengthTarget.min}~${lengthTarget.max}자)를 벗어남.`;
+      normalizedReview.status = 'revise';
+      normalizedReview.must_fix = Array.isArray(normalizedReview.must_fix)
+        ? [...normalizedReview.must_fix, detail]
+        : [detail];
       normalizedReview.issues = Array.isArray(normalizedReview.issues)
         ? normalizedReview.issues
         : [];
-      if (lengthCheck.severity === 'soft') {
-        normalizedReview.suggestions = Array.isArray(normalizedReview.suggestions)
-          ? [...normalizedReview.suggestions, detail]
-          : [detail];
-        normalizedReview.issues.push({
-          type: 'length',
-          detail: `${detail} (minor)`,
-          evidence: `char_count_no_space=${lengthCheck.value}`,
-        });
-      } else {
-        normalizedReview.status = 'revise';
-        normalizedReview.must_fix = Array.isArray(normalizedReview.must_fix)
-          ? [...normalizedReview.must_fix, detail]
-          : [detail];
-        normalizedReview.issues.push({
-          type: 'length',
-          detail,
-          evidence: `char_count_no_space=${lengthCheck.value}`,
-        });
-      }
+      normalizedReview.issues.push({
+        type: 'length',
+        detail,
+        evidence: `char_count_no_space=${lengthCheck.value}`,
+      });
     }
 
     return {
