@@ -427,13 +427,58 @@ const stripFences = (text) => {
     .trim();
 };
 
+const findJsonCandidates = (text) => {
+  const source = stripFences(text);
+  const candidates = [];
+  const stack = [];
+  let start = -1;
+  let inString = false;
+  let escaped = false;
+
+  for (let i = 0; i < source.length; i += 1) {
+    const char = source[i];
+    if (inString) {
+      if (char === '"' && !escaped) {
+        inString = false;
+      }
+      if (char === '\\' && !escaped) {
+        escaped = true;
+      } else {
+        escaped = false;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      escaped = false;
+      continue;
+    }
+
+    if (char === '{' || char === '[') {
+      if (stack.length === 0) start = i;
+      stack.push(char === '{' ? '}' : ']');
+      continue;
+    }
+
+    if (char === '}' || char === ']') {
+      if (stack.length && char === stack[stack.length - 1]) {
+        stack.pop();
+        if (stack.length === 0 && start !== -1) {
+          candidates.push(source.slice(start, i + 1));
+          start = -1;
+        }
+      }
+    }
+  }
+
+  return candidates;
+};
+
 const normalizeJsonLike = (text) => {
-  const cleaned = stripFences(text);
-  const match = cleaned.match(/\{[\s\S]*\}/) || cleaned.match(/\[[\s\S]*\]/);
-  if (!match) return '';
-  const sanitized = match[0]
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
+  const candidates = findJsonCandidates(text);
+  if (!candidates.length) return '';
+  const sanitized = candidates[0]
     .replace(/,\s*([}\]])/g, '$1')
     .trim();
   return sanitizeJsonString(sanitized);
@@ -471,6 +516,17 @@ const sanitizeJsonString = (value) => {
 };
 
 const extractJson = (text) => {
+  const candidates = findJsonCandidates(text);
+  for (const candidate of candidates) {
+    const sanitized = sanitizeJsonString(
+      candidate.replace(/,\s*([}\]])/g, '$1').trim()
+    );
+    try {
+      return JSON.parse(sanitized);
+    } catch {
+      // try next candidate
+    }
+  }
   const normalized = normalizeJsonLike(text);
   if (!normalized) {
     throw new Error('JSON block not found in model output');
