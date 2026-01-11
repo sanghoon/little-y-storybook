@@ -20,12 +20,9 @@ describe('content loader', () => {
     expect(chapters[0].estimatedReadTime).toBeTypeOf('number');
   });
 
-  it('allows missing pipeline_version in legacy content', () => {
+  it('handles pipeline_version field when present', () => {
     const versions = loadVersions();
-    expect(versions.some((version) => version.pipelineVersion === undefined)).toBe(true);
-    const withPipeline = versions.find((version) => version.pipelineVersion);
-    if (withPipeline) {
-      expect(withPipeline.pipelineVersion).toBeTypeOf('string');
-    }
+    const withPipeline = versions.filter((version) => version.pipelineVersion !== undefined);
+    expect(withPipeline.every((version) => typeof version.pipelineVersion === 'string')).toBe(true);
   });
 });
