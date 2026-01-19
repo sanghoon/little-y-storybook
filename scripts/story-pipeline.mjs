@@ -4,9 +4,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import * as z from 'zod';
 import YAML from 'yaml';
-import { ChatOpenAI } from '@langchain/openai';
 import { StateGraph, START, END } from '@langchain/langgraph';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { createChatModel, getProviderForModel } from './lib/model-provider.mjs';
 
 const DEFAULT_MODEL = process.env.STORY_MODEL ?? 'gpt-5.1';
 const DEFAULT_REASONING_EFFORT = process.env.REASONING_EFFORT ?? 'medium';
@@ -33,7 +33,7 @@ Options:
   --episodes "N"              Force episode count when length is series
   --source "..."              Source/original story title
   --tags "tag1,tag2"          Comma-separated tags
-  --model "gpt-5.1"            Override model (default: ${DEFAULT_MODEL})
+  --model "gpt-5.1"            Override model (default: ${DEFAULT_MODEL}). Prefix selects provider (gpt-*=OpenAI, gemini-*=Google).
   --max-iterations "N"         Critic rewrite loop limit (capped at 2)
   --plan-max-iterations "N"    Plan review loop limit (default: ${DEFAULT_PLAN_MAX_ITERATIONS})
   --slug "custom-slug"         Override filename slug
@@ -41,7 +41,6 @@ Options:
   --overwrite                 Overwrite existing file
   --print                     Print final markdown to stdout
   --dry-run                   Skip writing output
-  --no-tracing                Disable LangChain tracing even if env is set
   --help                      Show this help
 
 Pipeline:
@@ -53,7 +52,6 @@ const BOOLEAN_FLAGS = new Set([
   'overwrite',
   'print',
   'dry-run',
-  'no-tracing',
 ]);
 
 const parseArgs = (argv) => {
@@ -76,7 +74,6 @@ const parseArgs = (argv) => {
     overwrite: false,
     print: false,
     dryRun: false,
-    noTracing: false,
     help: false,
   };
 
@@ -85,7 +82,11 @@ const parseArgs = (argv) => {
     if (!arg.startsWith('--')) continue;
     const key = arg.slice(2);
     if (BOOLEAN_FLAGS.has(key)) {
-      args[key] = true;
+      if (key === 'dry-run') {
+        args.dryRun = true;
+      } else {
+        args[key] = true;
+      }
       continue;
     }
     const value = argv[i + 1];
@@ -173,6 +174,49 @@ const resolveOutputPath = ({ slug, ageRange, lengthType, output }) => {
 };
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+const TAG_POOL = [
+  '고전각색',
+  '전래동화',
+  '신화',
+  '창작동화',
+  '판타지',
+  '모험',
+  '우정',
+  '성장',
+  '가족',
+  '용기',
+  '마법',
+  '동물',
+  '음악',
+  '유머',
+  '나눔',
+  '희생',
+  '정직',
+  '자존감',
+  '자기이해',
+  '협동',
+  '재치',
+  '지혜',
+  '귀향',
+  '공주',
+  '편견극복',
+  '보은',
+  '의인화',
+];
+
+const TAG_POOL_SET = new Set(TAG_POOL);
+
+const filterAllowedTags = (tags) => {
+  if (!Array.isArray(tags)) return [];
+  return Array.from(
+    new Set(
+      tags
+        .map((tag) => sanitizeLine(tag))
+        .filter((tag) => tag && TAG_POOL_SET.has(tag))
+    )
+  );
+};
 
 const LENGTH_PROFILE = {
   short: { min: 700, max: 1100 },
@@ -540,7 +584,8 @@ const invokeJson = async (model, messages, label, schema) => {
   try {
     return extractJson(content);
   } catch (error) {
-    if (schema && typeof model.withStructuredOutput === 'function') {
+    const supportsStructured = model?._supportsStructuredOutput !== false;
+    if (schema && supportsStructured && typeof model.withStructuredOutput === 'function') {
       try {
         const structured = model.withStructuredOutput(schema);
         return await structured.invoke(messages);
@@ -576,7 +621,8 @@ const invokeJson = async (model, messages, label, schema) => {
 };
 
 const invokeWithSchema = async (model, messages, label, schema, options = {}) => {
-  const useStructured = options.useStructured !== false;
+  const supportsStructured = model?._supportsStructuredOutput !== false;
+  const useStructured = supportsStructured && options.useStructured !== false;
   if (useStructured && schema && typeof model.withStructuredOutput === 'function') {
     try {
       return await model.withStructuredOutput(schema).invoke(messages);
@@ -603,7 +649,6 @@ const invokeTwoStage = async (model, prompt, label, schema, options = {}) => {
 };
 
 const ensureTracing = (args) => {
-  if (args.noTracing) return;
   if (
     process.env.LANGSMITH_TRACING === 'true' ||
     process.env.LANGSMITH_TRACING_V2 === 'true' ||
@@ -624,23 +669,31 @@ const ensureTracing = (args) => {
   }
 };
 
-const buildModels = (args) => {
-  const base = {
-    model: args.model,
-    modelKwargs: {
-      reasoning_effort: DEFAULT_REASONING_EFFORT,
-    },
-  };
+const buildModels = async (args) => {
+  const provider = getProviderForModel(args.model);
+  const supportsTemperature = provider !== 'openai' || !/^gpt-5/i.test(args.model);
+  const plannerTemp = supportsTemperature ? 0.4 : undefined;
+  const writerTemp = supportsTemperature ? 0.7 : undefined;
+  const reviewerTemp = supportsTemperature ? 0.2 : undefined;
 
-  const supportsTemperature = !/^gpt-5/i.test(args.model);
-  const planner = supportsTemperature ? { temperature: 0.4 } : {};
-  const writer = supportsTemperature ? { temperature: 0.7 } : {};
-  const reviewer = supportsTemperature ? { temperature: 0.2 } : {};
+  const reasoningEffort = provider === 'openai' ? DEFAULT_REASONING_EFFORT : undefined;
 
   return {
-    planner: new ChatOpenAI({ ...base, ...planner }),
-    writer: new ChatOpenAI({ ...base, ...writer }),
-    reviewer: new ChatOpenAI({ ...base, ...reviewer }),
+    planner: await createChatModel({
+      model: args.model,
+      temperature: plannerTemp,
+      reasoningEffort,
+    }),
+    writer: await createChatModel({
+      model: args.model,
+      temperature: writerTemp,
+      reasoningEffort,
+    }),
+    reviewer: await createChatModel({
+      model: args.model,
+      temperature: reviewerTemp,
+      reasoningEffort,
+    }),
   };
 };
 
@@ -678,7 +731,7 @@ Rules:
 - Do NOT include story_text or any long prose. Planning fields must stay short and single-line.
 - Do NOT include line breaks inside any string values.
 - Use ONLY the keys shown in the schema example; do not add extra keys.
-- Use tags from this pool when applicable: 고전각색, 전래동화, 신화, 창작동화, 판타지, 모험, 우정, 성장, 가족, 용기, 마법, 동물, 음악, 유머, 나눔, 희생, 정직, 자존감, 자기이해, 협동, 재치, 지혜, 귀향, 공주, 편견극복, 보은, 의인화.
+- Use tags from this pool when applicable: ${TAG_POOL.join(', ')}.
 - plot_outline should be scene-by-scene (brief lines).
 - Define a clear, consistent tone_guide and style_guide (narrator voice, tense, rhythm, dialogue style).
 - Respect provided age range, length, or episode count unless it harms suitability.
@@ -1370,6 +1423,7 @@ const normalizePlan = (plan, input) => {
   if (input.tags.length) {
     normalized.tags = Array.from(new Set([...normalized.tags, ...input.tags]));
   }
+  normalized.tags = filterAllowedTags(normalized.tags);
 
   const ageProfile = getAgeProfile(normalized.target_age_range);
   if (Array.isArray(normalized.characters) && normalized.characters.length > ageProfile.maxCharacters) {
@@ -1992,7 +2046,7 @@ const run = async () => {
   }
 
   ensureTracing(args);
-  const models = buildModels(args);
+  const models = await buildModels(args);
   const app = buildGraph(models);
 
   const initialState = {
@@ -2051,6 +2105,7 @@ const run = async () => {
       ...(Array.isArray(plan.tags) ? plan.tags : []),
     ])
   );
+  const filteredStoryTags = filterAllowedTags(storyTags);
 
   plan.story_title = storyTitle;
   plan.story_summary = storySummary;
@@ -2065,13 +2120,13 @@ const run = async () => {
       id: storyId,
       title: storyTitle,
       summary: storySummary,
-      tags: storyTags,
+      tags: filteredStoryTags,
       versions: [plan.id],
     });
   } else {
     storyEntry.title = storyTitle;
     storyEntry.summary = storyEntry.summary || storySummary;
-    storyEntry.tags = storyTags.length ? storyTags : storyEntry.tags;
+    storyEntry.tags = filteredStoryTags.length ? filteredStoryTags : storyEntry.tags;
     storyEntry.versions = Array.isArray(storyEntry.versions) ? storyEntry.versions : [];
     if (!storyEntry.versions.includes(plan.id)) {
       storyEntry.versions.push(plan.id);
@@ -2154,7 +2209,7 @@ const run = async () => {
   console.log(`Meta: ${args.dryRun ? '(dry-run)' : metaPathForFrontmatter}`);
   console.log(`Stories index: ${args.dryRun ? '(dry-run)' : STORIES_PATH}`);
 
-  if (!args.noTracing && !process.env.LANGSMITH_TRACING && !process.env.LANGCHAIN_TRACING_V2) {
+  if (!process.env.LANGSMITH_TRACING && !process.env.LANGCHAIN_TRACING_V2) {
     console.log('Tracing: disabled (set LANGCHAIN_TRACING_V2=true + LANGCHAIN_API_KEY, or LANGSMITH_TRACING=true + LANGSMITH_API_KEY)');
   }
 
