@@ -6,7 +6,7 @@
 - **Planner**: 원전 범위/형식(format, length_tier) 결정 → 원작이 연령에 적합하면 사건/결말 유지(요약/생략만 허용) → 캐릭터 압축 → 씬/에피소드 설계
 - **Writer**: 설계도 기반 초안 작성(문어체 중심, 안전 가이드 적용, 감각 묘사 강화)
 - **Critic**: 안전/개연성/플랜 이탈 점검 → 실패 시 최대 2회 재작성
-- **Editor**: 구연체 변환 + 감정/효과음/쉬어가기 태그 추가
+- **Editor**: 동화책 최종본 윤문(문장/호흡/톤 정리, 일관된 서술체 유지). **자기 전에 읽어주는 톤(차분/따뜻)**을 기준으로 과한 구연 톤 업을 피하고, 오디오 지시문([SFX], [Pause])은 사용하지 않음.
 
 ### 포맷/길이 규칙
 - **format**: `single` 또는 `series`
@@ -47,9 +47,6 @@ npm run generate:story -- \
 `content/versions/<english-slug>__<age>__<length>.md` 형식으로 저장됩니다.
 스토리 인덱스는 자동으로 `content/stories.yml`에 반영됩니다.
 생성 과정 메타데이터는 `content/versions/meta/<english-slug>__<age>__<length>.json`에 저장됩니다.
-
-Editor 결과에는 낭독을 돕기 위한 오디오 지시문이 포함됩니다.
-예: `(활기차게)`, `[SFX: 바람 소리]`, `[Pause: Short]`
 
 ```md
 ---
