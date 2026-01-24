@@ -28,17 +28,20 @@
 - Tests live in `tests/*.test.ts`.
 - When changing content loading or parsing, update/add tests accordingly.
 - Run `npm test` before pushing.
+- Before committing pipeline or content changes, run both `npm test` and `npm run validate:content`.
 
 ## Commit & Pull Request Guidelines
 - Commit messages use an **imperative title + body**. Example:
   - `Set up Astro app and core UI`
   - Blank line
   - `Implement content loader, pages, and reader UX improvements.`
+- Commit messages should be a single-line title plus a short multi-line body that summarizes the final changes.
 - PRs should include:
   - Summary of changes
   - Linked issue (if any)
   - Screenshots or recordings for UI changes
   - Notes about any data/content updates
+  - When writing commit or PR messages, describe only the net effect that remains after all edits, not intermediate steps that were added and then removed.
 
 ## Content Authoring Notes
 - Each version file includes frontmatter plus Markdown body.
