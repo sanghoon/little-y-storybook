@@ -38,7 +38,7 @@
 5. **Draft (문어체 초안)**
 6. **Critic (자연어 검사 → JSON)**
 7. **Rewrite (수정 초안)**
-8. **Editor (구연체 최종본)**
+8. **Editor (동화책 최종본)**
 9. **Final Packaging (Markdown + Frontmatter)**
 
 > 핵심: **자연어 1차 → 구조화된 2차 정리** 흐름을 지킨다.  
@@ -59,8 +59,7 @@
 - 원작이 연령에 적합하면 **사건/결말 유지**, 요약/생략만 허용
 - **새 사건/도덕적 결론 추가 금지**
 - 등장인물 수 제한(3-5: 최대 3, 6-7: 최대 4, 8-9: 최대 4)
-- **plot_outline** (씬 단위)
-- **episode_outlines** (회차 단위, 회차마다 다른 사건)
+- **episode_outlines** (회차 단위, 회차마다 다른 사건/전개)
 
 ### 3.2 Planner Stage 2 (JSON 계획)
 목표: **필수 항목을 빠짐없이 채웠는지 확인**
@@ -95,7 +94,6 @@
   "characters": ["..."],
   "setting": "...",
   "themes": ["..."],
-  "plot_outline": ["..."],
   "episode_outlines": [
     { "episode": 1, "title": "...", "summary": "...", "beats": ["..."] }
   ],
@@ -169,7 +167,9 @@ Stage 2: JSON 출력
 필수 사항
 - 서술문은 **했어요체 또는 했습니다체 중 하나로 일관**
 - **대사는 인물 성격에 맞게 자유롭게**
-- 과도한 SFX/PAUSE 남발 금지
+- `[SFX: ...]`, `[Pause: ...]` 같은 오디오 지시문은 사용하지 않음
+- 자기 전에 읽어주는 상황을 기본으로 가정하고 **차분/따뜻한 톤**을 우선
+- (속삭이며) 같은 괄호 감정표현은 필요할 때만, 대사 바로 앞에서만 최소한으로 허용(과한 구연 톤 업 금지)
 - 플롯 변경 금지
 
 ---
@@ -189,7 +189,7 @@ title: "..."
 summary: "..."
 age_range: "6-7"
 length_type: "short|medium|long"
-pipeline_version: "v2"
+pipeline_version: "v3-gemini"
 estimated_read_time: 6
 actual_char_count: 1200
 actual_word_count: 350
@@ -208,7 +208,7 @@ title: "..."
 summary: "..."
 age_range: "6-7"
 length_type: "series"
-pipeline_version: "v2"
+pipeline_version: "v3-gemini"
 estimated_read_time: 12
 actual_char_count: 4000
 actual_word_count: 1200

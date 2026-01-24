@@ -142,12 +142,6 @@ const analyzeTrace = async (client, traceId) => {
     issues.push("beats lost during normalization (raw had beats, normalized all zero)");
   }
 
-  const rawPlot = Array.isArray(rawPlan.plot_outline) ? rawPlan.plot_outline.length : 0;
-  const normPlot = Array.isArray(planNormalized.plot_outline) ? planNormalized.plot_outline.length : 0;
-  if (rawPlot > 0 && normPlot === 0) {
-    issues.push("plot_outline lost during normalization");
-  }
-
   if (!issues.length) return null;
   return { traceId, storyTitle: rawPlan.story_title, issues };
 };
