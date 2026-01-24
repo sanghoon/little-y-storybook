@@ -455,6 +455,18 @@ const saveStories = (stories) => {
   fs.writeFileSync(STORIES_PATH, String(doc), 'utf-8');
 };
 
+const readFrontmatterFile = (filePath) => {
+  if (!fs.existsSync(filePath)) return null;
+  const raw = fs.readFileSync(filePath, 'utf-8');
+  const match = raw.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return null;
+  try {
+    return YAML.parse(match[1]) ?? null;
+  } catch {
+    return null;
+  }
+};
+
 const nextStoryId = (stories) => {
   const ids = stories
     .map((story) => String(story.id ?? ''))
@@ -2184,10 +2196,10 @@ const run = async () => {
     storyEntry = stories.find((entry) => entry.title === args.source) ?? null;
   }
 
-  const storyId = storyEntry?.id || args.storyId || nextStoryId(stories);
-  const storyTitle =
+  let storyId = storyEntry?.id || args.storyId || nextStoryId(stories);
+  let storyTitle =
     storyEntry?.title || plan.story_title || args.storyTitle || args.title || args.source || 'Untitled';
-  const storySummary =
+  let storySummary =
     storyEntry?.summary || plan.story_summary || plan.summary || args.synopsis || '';
   const storyTags = Array.from(
     new Set([
@@ -2201,6 +2213,47 @@ const run = async () => {
   plan.story_summary = storySummary;
   if (!plan.version_title) {
     plan.version_title = '';
+  }
+
+  const slugBase =
+    slugifyAscii(args.slug) ||
+    slugifyAscii(plan.story_slug_en) ||
+    slugifyAscii(storyTitle) ||
+    `story-${storyId.replace(/\D/g, '') || Date.now()}`;
+  const outputPath = resolveOutputPath({
+    slug: slugBase,
+    ageRange: plan.target_age_range,
+    lengthType: plan.length_type,
+    output: args.output,
+  });
+
+  let overwriteFrontmatter = null;
+  if (args.overwrite) {
+    overwriteFrontmatter = readFrontmatterFile(outputPath);
+  }
+
+  if (overwriteFrontmatter?.story_id) {
+    const overwriteStoryId = String(overwriteFrontmatter.story_id).trim();
+    if (overwriteStoryId) {
+      storyId = overwriteStoryId;
+      const entryById = stories.find((entry) => entry.id === overwriteStoryId) ?? null;
+      if (entryById) {
+        storyEntry = entryById;
+      }
+      if (!args.storyTitle && !args.title && !args.source && entryById?.title) {
+        storyTitle = entryById.title;
+      }
+      if (!args.synopsis && entryById?.summary) {
+        storySummary = entryById.summary;
+      }
+    }
+  }
+
+  if (overwriteFrontmatter?.id) {
+    const overwriteVersionId = String(overwriteFrontmatter.id).trim();
+    if (overwriteVersionId) {
+      plan.id = overwriteVersionId;
+    }
   }
 
   plan.id = plan.id || nextVersionId(storyId, stories);
@@ -2222,18 +2275,6 @@ const run = async () => {
       storyEntry.versions.push(plan.id);
     }
   }
-
-  const slugBase =
-    slugifyAscii(args.slug) ||
-    slugifyAscii(plan.story_slug_en) ||
-    slugifyAscii(storyTitle) ||
-    `story-${storyId.replace(/\D/g, '') || Date.now()}`;
-  const outputPath = resolveOutputPath({
-    slug: slugBase,
-    ageRange: plan.target_age_range,
-    lengthType: plan.length_type,
-    output: args.output,
-  });
 
   const metaFileName = `${slugBase}__${plan.target_age_range}__${plan.length_type}.json`;
   const metaFilePath = path.join(PIPELINE_META_DIR, metaFileName);
