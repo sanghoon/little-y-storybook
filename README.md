@@ -60,7 +60,17 @@ npm run build
 정적 콘텐츠를 미리 생성하기 위한 파이프라인입니다.
 
 ```bash
-npm run generate:story -- --title "..." --synopsis "..."
+npm run generate:story -- --title "..."
+```
+
+옵션 예시:
+```bash
+npm run generate:story -- --title "호빗" --age "6-7" --length "series"
+```
+
+생성 후 콘텐츠 검증:
+```bash
+npm run validate:content
 ```
 
 자세한 사용법은 `docs/cli-content-pipeline.md`를 참고하세요.
