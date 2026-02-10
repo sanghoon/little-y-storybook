@@ -120,7 +120,7 @@ versionFiles.forEach((name) => {
   const { data, body } = parseFrontmatter(raw, filePath);
   if (!data) return;
 
-  const required = ['id', 'story_id', 'title', 'summary', 'age_range', 'length_type', 'tags'];
+  const required = ['id', 'story_id', 'title', 'summary', 'age_range', 'length_type', 'updated_at', 'tags'];
   required.forEach((key) => {
     if (!data[key]) report('error', filePath, `Missing frontmatter field: ${key}`);
   });
@@ -149,6 +149,14 @@ versionFiles.forEach((name) => {
   const lengthType = String(data.length_type || '');
   if (lengthType && !ALLOWED_LENGTH.has(lengthType)) {
     report('error', filePath, `Invalid length_type: ${lengthType}`);
+  }
+
+  const updatedAt = String(data.updated_at || '');
+  if (updatedAt) {
+    const updatedAtMs = Date.parse(updatedAt);
+    if (Number.isNaN(updatedAtMs)) {
+      report('error', filePath, `Invalid updated_at: ${updatedAt}`);
+    }
   }
 
   const match = name.match(/^(.+)__([0-9]-[0-9])__(short|medium|long|series)\.md$/);

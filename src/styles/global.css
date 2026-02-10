@@ -186,6 +186,12 @@ body {
   overflow: hidden;
 }
 
+.card-date {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
 .meta {
   display: flex;
   flex-wrap: wrap;
@@ -474,6 +480,24 @@ button.tag {
   border-radius: var(--radius-sm);
   border: 1px solid var(--line);
   padding: 10px 12px;
+  font-family: 'Gowun Dodum', sans-serif;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.sort-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-family: 'Gowun Dodum', sans-serif;
+}
+
+.sort-control select {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  padding: 8px 10px;
   font-family: 'Gowun Dodum', sans-serif;
   background: var(--surface);
   color: var(--ink);

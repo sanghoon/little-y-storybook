@@ -6,6 +6,8 @@ describe('content loader', () => {
     const versions = loadVersions();
     expect(versions.length).toBeGreaterThan(0);
     expect(versions[0].title).toBeTruthy();
+    expect(versions[0].updatedAt).toBeTruthy();
+    expect(Number.isFinite(versions[0].updatedAtMs)).toBe(true);
   });
 
   it('parses chapters for series content', () => {
@@ -24,5 +26,14 @@ describe('content loader', () => {
     const versions = loadVersions();
     const withPipeline = versions.filter((version) => version.pipelineVersion !== undefined);
     expect(withPipeline.every((version) => typeof version.pipelineVersion === 'string')).toBe(true);
+  });
+
+  it('normalizes updated_at values for sorting', () => {
+    const versions = loadVersions();
+    expect(
+      versions.every(
+        (version) => typeof version.updatedAt === 'string' && Number.isFinite(version.updatedAtMs)
+      )
+    ).toBe(true);
   });
 });
