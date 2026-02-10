@@ -6,6 +6,7 @@ summary: "선비가 구해준 아기 까치의 엄마가 위험에 처한 선비
 age_range: "3-5"
 length_type: "short"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-19T14:52:09.456Z"
 estimated_read_time: 7
 actual_char_count: 1228
 actual_word_count: 393

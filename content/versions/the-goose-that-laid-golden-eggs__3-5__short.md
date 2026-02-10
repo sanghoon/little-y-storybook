@@ -6,6 +6,7 @@ summary: "가난한 농부가 매일 황금알을 낳는 거위를 얻어 부자
 age_range: "3-5"
 length_type: "short"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-22T16:25:10.522Z"
 estimated_read_time: 5
 actual_char_count: 909
 actual_word_count: 289

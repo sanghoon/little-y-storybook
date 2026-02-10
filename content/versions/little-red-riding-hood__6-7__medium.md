@@ -6,6 +6,7 @@ summary: "심부름을 가던 빨간 모자가 늑대의 꾀임에 빠져 위험
 age_range: "6-7"
 length_type: "medium"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-22T17:06:58.705Z"
 estimated_read_time: 9
 actual_char_count: 1623
 actual_word_count: 519

@@ -7,6 +7,7 @@ summary: "라마가 바다에 돌다리를 놓아 랑카 섬으로 진격하고,
 age_range: "6-7"
 length_type: "series"
 pipeline_version: "v3-gemini"
+updated_at: "2026-02-09T13:28:38.702Z"
 estimated_read_time: 18
 actual_char_count: 3278
 actual_word_count: 1033

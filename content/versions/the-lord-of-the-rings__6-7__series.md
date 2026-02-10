@@ -6,6 +6,7 @@ summary: "6-7세 아이들을 위해 복잡한 전쟁 묘사를 줄이고 프로
 age_range: "6-7"
 length_type: "series"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-24T13:34:48.696Z"
 estimated_read_time: 35
 actual_char_count: 6309
 actual_word_count: 1945

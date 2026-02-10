@@ -6,6 +6,7 @@ summary: "울보였던 평강공주는 바보 온달에게 시집보내겠다는
 age_range: "6-7"
 length_type: "long"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-22T17:52:31.691Z"
 estimated_read_time: 13
 actual_char_count: 2439
 actual_word_count: 759

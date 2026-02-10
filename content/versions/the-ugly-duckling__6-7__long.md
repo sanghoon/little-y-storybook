@@ -6,6 +6,7 @@ summary: "유난히 크고 못생긴 아기 오리가 태어나 농장 동물들
 age_range: "6-7"
 length_type: "long"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-24T12:06:07.225Z"
 estimated_read_time: 12
 actual_char_count: 2567
 actual_word_count: 815

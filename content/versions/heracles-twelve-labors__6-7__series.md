@@ -6,6 +6,7 @@ summary: "단단한 가죽을 가진 사자부터 지하 세계의 무서운 개
 age_range: "6-7"
 length_type: "series"
 pipeline_version: "v3-gemini"
+updated_at: "2026-02-09T13:42:58.046Z"
 estimated_read_time: 30
 actual_char_count: 6885
 actual_word_count: 2074

@@ -6,6 +6,7 @@ summary: "가난한 소년 알라딘이 신비한 램프의 요정 지니를 만
 age_range: "6-7"
 length_type: "series"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-29T14:00:58.321Z"
 estimated_read_time: 25
 actual_char_count: 5123
 actual_word_count: 1586

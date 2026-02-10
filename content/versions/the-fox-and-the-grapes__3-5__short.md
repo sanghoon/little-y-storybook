@@ -6,6 +6,7 @@ summary: "무더운 여름날, 배고픈 여우가 맛있는 포도를 발견하
 age_range: "3-5"
 length_type: "short"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-24T11:48:35.171Z"
 estimated_read_time: 6
 actual_char_count: 1108
 actual_word_count: 344

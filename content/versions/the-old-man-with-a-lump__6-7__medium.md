@@ -6,6 +6,7 @@ summary: "노래를 잘 부르는 착한 혹부리 영감이 도깨비들을 만
 age_range: "6-7"
 length_type: "medium"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-22T15:49:03.251Z"
 estimated_read_time: 5
 actual_char_count: 1246
 actual_word_count: 395

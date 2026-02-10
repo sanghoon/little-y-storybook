@@ -6,6 +6,7 @@ summary: "방귀를 참느라 병이 난 며느리가 시원하게 방귀를 뀌
 age_range: "6-7"
 length_type: "medium"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-24T11:27:19.609Z"
 estimated_read_time: 6
 actual_char_count: 1380
 actual_word_count: 431

@@ -6,6 +6,7 @@ summary: "깊은 산속 연못에 쇠도끼를 빠뜨린 나무꾼 앞에 산신
 age_range: "3-5"
 length_type: "short"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-24T11:36:53.643Z"
 estimated_read_time: 4
 actual_char_count: 796
 actual_word_count: 239
