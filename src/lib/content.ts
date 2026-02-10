@@ -17,6 +17,8 @@ export type Version = {
   summary: string;
   ageRange: string;
   lengthType: 'short' | 'medium' | 'long' | 'series' | string;
+  updatedAt: string;
+  updatedAtMs: number;
   estimatedReadTime?: number;
   tags: string[];
   markdown: string;
@@ -49,6 +51,13 @@ const toString = (value: unknown): string | undefined => {
   return String(value);
 };
 
+const toIsoDateString = (value: unknown): string | undefined => {
+  if (value === undefined || value === null || value === '') return undefined;
+  const date = new Date(String(value));
+  if (Number.isNaN(date.getTime())) return undefined;
+  return date.toISOString();
+};
+
 const stripMarkdown = (markdown: string) =>
   markdown
     .split('\n')
@@ -63,6 +72,8 @@ const stripMarkdown = (markdown: string) =>
     .replace(/[#>*_`]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
+
+const renderMarkdown = (markdown: string): string => String(marked.parse(markdown));
 
 export const parseChapters = (markdown: string): Chapter[] => {
   const chunks = markdown.split(/^###\s+/m).filter(Boolean);
@@ -89,7 +100,7 @@ export const parseChapters = (markdown: string): Chapter[] => {
       title,
       estimatedReadTime,
       markdown: body,
-      html: marked.parse(body),
+      html: renderMarkdown(body),
       index: index + 1,
     };
   });
@@ -103,15 +114,18 @@ export const loadVersions = (): Version[] => {
 
   return files.map((file) => {
     const filePath = path.join(CONTENT_DIR, file);
+    const stat = fs.statSync(filePath);
     const source = fs.readFileSync(filePath, 'utf-8');
     const { data, content } = matter(source);
 
     const tags = toArray(data.tags);
     const markdown = content.trim();
-    const html = marked.parse(markdown);
+    const html = renderMarkdown(markdown);
     const lengthType = String(data.length_type ?? 'short');
     const isSeries = lengthType === 'series';
     const pipelineVersion = toString(data.pipeline_version);
+    const updatedAt = toIsoDateString(data.updated_at) ?? stat.mtime.toISOString();
+    const updatedAtMs = new Date(updatedAt).getTime();
 
     return {
       id: String(data.id ?? ''),
@@ -119,6 +133,8 @@ export const loadVersions = (): Version[] => {
       summary: String(data.summary ?? ''),
       ageRange: String(data.age_range ?? ''),
       lengthType,
+      updatedAt,
+      updatedAtMs,
       estimatedReadTime: toNumber(data.estimated_read_time),
       tags,
       markdown,

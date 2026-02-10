@@ -2,10 +2,54 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { loadVersions, getExcerpt } from '../../lib/content';
 
-const versions = loadVersions();
+const DEFAULT_SORT = 'updated-desc';
+type SortValue = 'updated-desc' | 'updated-asc' | 'title-asc' | 'title-desc';
+type StoryVersion = ReturnType<typeof loadVersions>[number] & {
+  updatedAt: string;
+  updatedAtMs: number;
+};
+
+const sortVersions = (items: StoryVersion[], sort: SortValue): StoryVersion[] => {
+  const versions = [...items];
+  if (sort === 'updated-asc') {
+    return versions.sort((a, b) => a.updatedAtMs - b.updatedAtMs);
+  }
+  if (sort === 'title-asc') {
+    return versions.sort(
+      (a, b) =>
+        a.title.localeCompare(b.title, 'ko') || b.updatedAtMs - a.updatedAtMs
+    );
+  }
+  if (sort === 'title-desc') {
+    return versions.sort(
+      (a, b) =>
+        b.title.localeCompare(a.title, 'ko') || b.updatedAtMs - a.updatedAtMs
+    );
+  }
+  return versions.sort((a, b) => b.updatedAtMs - a.updatedAtMs);
+};
+
+const formatUpdatedDate = (value: string): string => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+
+const sortOptions = [
+  { value: 'updated-desc', label: '최신 업데이트순' },
+  { value: 'updated-asc', label: '오래된 업데이트순' },
+  { value: 'title-asc', label: '제목 가나다순' },
+  { value: 'title-desc', label: '제목 역순' },
+] satisfies Array<{ value: SortValue; label: string }>;
+
+const versions = sortVersions(loadVersions() as StoryVersion[], DEFAULT_SORT);
 const ages = ['3-5', '6-7', '8-9'];
-const lengths = ['short', 'medium', 'long', 'series'];
-const lengthLabels = {
+const lengths = ['short', 'medium', 'long', 'series'] as const;
+const lengthLabels: Record<(typeof lengths)[number], string> = {
   short: '짧음',
   medium: '보통',
   long: '김',
@@ -25,6 +69,14 @@ const tags = Array.from(
 
     <div class="search-bar">
       <input type="search" placeholder="제목이나 키워드를 입력하세요" data-search />
+      <label class="sort-control">
+        정렬
+        <select data-sort>
+          {sortOptions.map((option: { value: SortValue; label: string }) => (
+            <option value={option.value}>{option.label}</option>
+          ))}
+        </select>
+      </label>
       <button class="button secondary" type="button" data-reset>초기화</button>
     </div>
 
@@ -58,7 +110,7 @@ const tags = Array.from(
 
     <div class="chip-row is-scroll" data-filter-group="tag">
       <button class="chip is-active" data-filter-value="" type="button">전체 태그</button>
-      {tags.map((tag) => (
+      {tags.map((tag: string) => (
         <button
           class="chip"
           data-filter-value={tag}
@@ -86,9 +138,11 @@ const tags = Array.from(
             data-tags={version.tags.join(',')}
             data-title={version.title}
             data-summary={version.summary}
+            data-updated-at-ms={String(version.updatedAtMs)}
           >
             <h3>{version.title}</h3>
             <p>{getExcerpt(version, 100)}</p>
+            <p class="card-date">업데이트 {formatUpdatedDate(version.updatedAt)}</p>
             <div class="meta">
               <span class="badge">{version.ageRange}세</span>
               <span class="badge">{version.lengthType}</span>
@@ -130,10 +184,14 @@ const tags = Array.from(
   </section>
 
   <script is:inline>
-    const state = { age: '', length: '', tag: '', query: '' };
+    const SORT_VALUES = ['updated-desc', 'updated-asc', 'title-asc', 'title-desc'];
+    const DEFAULT_SORT = 'updated-desc';
+    const state = { age: '', length: '', tag: '', query: '', sort: DEFAULT_SORT };
     const countEl = document.querySelector('[data-count]');
     const emptyEl = document.querySelector('[data-empty]');
     const searchInput = document.querySelector('[data-search]');
+    const sortSelect = document.querySelector('[data-sort]');
+    const grid = document.querySelector('[data-card-grid]');
     const resetButtons = document.querySelectorAll('[data-reset]');
 
     const params = new URLSearchParams(window.location.search);
@@ -141,8 +199,10 @@ const tags = Array.from(
     state.length = params.get('length') || '';
     state.tag = params.get('tag') || '';
     state.query = params.get('q') || '';
+    state.sort = SORT_VALUES.includes(params.get('sort')) ? params.get('sort') : DEFAULT_SORT;
 
     if (searchInput) searchInput.value = state.query;
+    if (sortSelect) sortSelect.value = state.sort;
 
     const syncButtons = () => {
       document.querySelectorAll('[data-filter-group]').forEach((group) => {
@@ -163,11 +223,45 @@ const tags = Array.from(
       if (state.length) next.set('length', state.length);
       if (state.tag) next.set('tag', state.tag);
       if (state.query) next.set('q', state.query);
+      if (state.sort && state.sort !== DEFAULT_SORT) next.set('sort', state.sort);
       const nextUrl = `${window.location.pathname}${next.toString() ? `?${next}` : ''}`;
       window.history.replaceState({}, '', nextUrl);
     };
+
+    const compareCards = (left, right) => {
+      const leftTitle = left.dataset.title || '';
+      const rightTitle = right.dataset.title || '';
+      const leftUpdatedAt = Number(left.dataset.updatedAtMs || 0);
+      const rightUpdatedAt = Number(right.dataset.updatedAtMs || 0);
+
+      if (state.sort === 'updated-asc') {
+        return leftUpdatedAt - rightUpdatedAt;
+      }
+
+      if (state.sort === 'title-asc') {
+        return leftTitle.localeCompare(rightTitle, 'ko') || rightUpdatedAt - leftUpdatedAt;
+      }
+
+      if (state.sort === 'title-desc') {
+        return rightTitle.localeCompare(leftTitle, 'ko') || rightUpdatedAt - leftUpdatedAt;
+      }
+
+      return rightUpdatedAt - leftUpdatedAt;
+    };
+
+    const sortCards = (cards) => {
+      if (!grid) return;
+      cards
+        .slice()
+        .sort(compareCards)
+        .forEach((card) => {
+          grid.appendChild(card);
+        });
+    };
+
     const updateCards = () => {
-      const cards = document.querySelectorAll('[data-card-grid] .card');
+      const cards = Array.from(document.querySelectorAll('[data-card-grid] .card'));
+      sortCards(cards);
       let count = 0;
       cards.forEach((card) => {
         const age = card.dataset.age || '';
@@ -218,13 +312,24 @@ const tags = Array.from(
       });
     }
 
+    if (sortSelect) {
+      sortSelect.addEventListener('change', (event) => {
+        const next = event.target.value;
+        state.sort = SORT_VALUES.includes(next) ? next : DEFAULT_SORT;
+        updateUrl();
+        updateCards();
+      });
+    }
+
     resetButtons.forEach((button) => {
       button.addEventListener('click', () => {
         state.age = '';
         state.length = '';
         state.tag = '';
         state.query = '';
+        state.sort = DEFAULT_SORT;
         if (searchInput) searchInput.value = '';
+        if (sortSelect) sortSelect.value = DEFAULT_SORT;
         syncButtons();
         updateUrl();
         updateCards();

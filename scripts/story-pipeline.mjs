@@ -2057,7 +2057,16 @@ const buildGraph = ({ planner, writer, reviewer }) => {
   return graph.compile();
 };
 
-const assembleMarkdown = ({ plan, drafts, storyId, metaPath, lengthStats, readTime, pipelineVersion }) => {
+const assembleMarkdown = ({
+  plan,
+  drafts,
+  storyId,
+  metaPath,
+  lengthStats,
+  readTime,
+  pipelineVersion,
+  updatedAt,
+}) => {
   const tags = Array.isArray(plan.tags) ? plan.tags : [];
   const tagLine = tags.length ? `[${tags.map(escapeYaml).join(', ')}]` : '[]';
   const totalReadTime = Number(readTime?.total_minutes) || undefined;
@@ -2075,6 +2084,7 @@ const assembleMarkdown = ({ plan, drafts, storyId, metaPath, lengthStats, readTi
     `age_range: ${escapeYaml(plan.target_age_range || '')}`,
     `length_type: ${escapeYaml(plan.length_type || 'short')}`,
     `pipeline_version: ${escapeYaml(pipelineVersion || PIPELINE_VERSION_V3)}`,
+    `updated_at: ${escapeYaml(updatedAt || new Date().toISOString())}`,
     totalReadTime ? `estimated_read_time: ${totalReadTime}` : null,
     lengthStats ? `actual_char_count: ${lengthStats.char_count_no_space}` : null,
     lengthStats ? `actual_word_count: ${lengthStats.word_count}` : null,
@@ -2286,6 +2296,7 @@ const run = async () => {
     drafts,
     lengthStats,
   });
+  const updatedAt = new Date().toISOString();
   const markdown = assembleMarkdown({
     plan,
     drafts,
@@ -2294,6 +2305,7 @@ const run = async () => {
     lengthStats,
     readTime,
     pipelineVersion,
+    updatedAt,
   });
 
   if (!args.dryRun) {
@@ -2304,7 +2316,7 @@ const run = async () => {
     fs.writeFileSync(outputPath, markdown, 'utf-8');
     fs.mkdirSync(path.dirname(metaFilePath), { recursive: true });
     const metaPayload = {
-      generated_at: new Date().toISOString(),
+      generated_at: updatedAt,
       model: args.model,
       reasoning_effort: DEFAULT_REASONING_EFFORT,
       pipeline_version: pipelineVersion,
