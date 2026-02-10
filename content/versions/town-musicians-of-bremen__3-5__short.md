@@ -6,6 +6,7 @@ summary: "멋진 음악가가 되고 싶은 당나귀는 길을 떠나 강아지
 age_range: "3-5"
 length_type: "short"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-22T16:03:40.790Z"
 estimated_read_time: 5
 actual_char_count: 1108
 actual_word_count: 334

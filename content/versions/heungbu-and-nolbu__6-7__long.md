@@ -6,6 +6,7 @@ summary: "6-7세 아이들을 위해 의성어와 의태어를 살려 리듬감 
 age_range: "6-7"
 length_type: "long"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-24T11:40:34.570Z"
 estimated_read_time: 12
 actual_char_count: 2124
 actual_word_count: 665

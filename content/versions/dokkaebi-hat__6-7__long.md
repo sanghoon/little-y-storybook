@@ -6,6 +6,7 @@ summary: "게으른 김 서방이 쓰면 투명해지는 도깨비 감투를 주
 age_range: "6-7"
 length_type: "long"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-19T14:46:22.885Z"
 estimated_read_time: 15
 actual_char_count: 3147
 actual_word_count: 1036

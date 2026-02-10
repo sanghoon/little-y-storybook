@@ -6,6 +6,7 @@ summary: "섣달그믐 밤, 추위와 배고픔에 떨던 성냥팔이 소녀가
 age_range: "6-7"
 length_type: "long"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-29T14:04:41.597Z"
 estimated_read_time: 11
 actual_char_count: 2090
 actual_word_count: 678

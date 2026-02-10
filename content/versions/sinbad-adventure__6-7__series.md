@@ -6,6 +6,7 @@ summary: "바그다드의 상인 신밧드가 항해 중 고래를 섬으로 착
 age_range: "6-7"
 length_type: "series"
 pipeline_version: "v3-gemini"
+updated_at: "2026-02-09T12:51:21.338Z"
 estimated_read_time: 10
 actual_char_count: 3784
 actual_word_count: 1172

@@ -6,6 +6,7 @@ summary: "복잡한 전투 묘사 대신 모험의 신비함과 빌보의 성장
 age_range: "6-7"
 length_type: "series"
 pipeline_version: "v3-gemini"
+updated_at: "2026-01-29T13:37:09.540Z"
 estimated_read_time: 42
 actual_char_count: 7305
 actual_word_count: 2269
