@@ -14,9 +14,9 @@
   },
   "dependencies": {
     "@langchain/core": "^1.1.7",
+    "@langchain/google-genai": "^2.1.10",
     "@langchain/langgraph": "^1.0.7",
     "@langchain/openai": "^1.2.0",
-    "@langchain/google-genai": "^2.1.10",
     "astro": "^5.16.6",
     "dotenv": "^16.4.5",
     "gray-matter": "^4.0.3",
@@ -25,6 +25,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "vitest": "^2.1.9"
+    "vitest": "^4.0.18"
   }
 }

@@ -116,8 +116,9 @@ Follow existing patterns and keep edits minimal and consistent.
 ## Environment & Secrets
 - `scripts/story-pipeline.mjs` uses API keys from env (`GOOGLE_API_KEY`, etc.).
 - Never hardcode credentials or tokens.
-- Do not add `.env` files to commits.
+- Do not add `.env` files to commits (use `.env.example` as a template).
 - If a script requires a key, fail fast with a clear error.
+- The repository is public. DO NOT log or expose sensitive credentials in PRs, issues, or commit messages.
 
 ## Cursor / Copilot Rules
 - No `.cursor/rules/`, `.cursorrules`, or `.github/copilot-instructions.md` were found.
