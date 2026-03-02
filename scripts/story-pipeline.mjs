@@ -8,7 +8,7 @@ import { StateGraph, START, END } from '@langchain/langgraph';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { createChatModel, getProviderForModel } from './lib/model-provider.mjs';
 
-const DEFAULT_MODEL = process.env.STORY_MODEL ?? 'gemini-3-pro-preview';
+const DEFAULT_MODEL = process.env.STORY_MODEL ?? 'gemini-3.1-pro-preview';
 const DEFAULT_REASONING_EFFORT = process.env.REASONING_EFFORT ?? 'medium';
 const DEFAULT_PLAN_MAX_ITERATIONS = Number(process.env.PLAN_MAX_ITERATIONS ?? 3);
 // Bump this when prompts or pipeline logic change materially.
@@ -40,7 +40,7 @@ Options:
   --episodes "N"              Force episode count when length is series
   --source "..."              Source/original story title
   --tags "tag1,tag2"          Comma-separated tags
-  --model "gemini-3-pro-preview" Override model (default: ${DEFAULT_MODEL}). Prefix selects provider (gpt-*=OpenAI, gemini-*=Google).
+  --model "gemini-3.1-pro-preview" Override model (default: ${DEFAULT_MODEL}). Prefix selects provider (gpt-*=OpenAI, gemini-*=Google).
   --max-iterations "N"         Critic rewrite loop limit (default: 3)
   --plan-max-iterations "N"    Plan review loop limit (default: ${DEFAULT_PLAN_MAX_ITERATIONS})
   --slug "custom-slug"         Override filename slug
