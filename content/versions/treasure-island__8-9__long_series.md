@@ -4,14 +4,14 @@ story_id: "story_050"
 title: "보물섬"
 summary: "여관에서 우연히 보물지도를 발견한 소년 짐 호킨스가 스몰렛 선장, 속을 알 수 없는 요리사 롱 존 실버와 함께 보물섬으로 떠나며 겪는 모험 이야기입니다."
 age_range: "8-9"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-02-28T16:28:15.327Z"
 estimated_read_time: 17
 actual_char_count: 5274
 actual_word_count: 1654
 actual_sentence_count: 161
-generation_meta_path: "pipeline/meta/treasure-island__8-9__series.json"
+generation_meta_path: "pipeline/meta/treasure-island__8-9__long_series.json"
 tags: ["고전각색", "모험", "용기", "성장"]
 ---
 ### 1화

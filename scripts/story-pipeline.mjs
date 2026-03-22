@@ -24,6 +24,13 @@ const CONTENT_DIR = path.resolve(process.cwd(), 'content', 'versions');
 const PIPELINE_DIR = path.resolve(process.cwd(), 'pipeline');
 const PIPELINE_META_DIR = path.join(PIPELINE_DIR, 'meta');
 const STORIES_PATH = path.resolve(process.cwd(), 'content', 'stories.yml');
+const SINGLE_LENGTH_TYPES = new Set(['short', 'medium', 'long']);
+const EXPLICIT_SERIES_LENGTH_TYPES = new Set(['short_series', 'long_series']);
+const CLI_SERIES_LENGTH_TYPES = new Set(['series', ...EXPLICIT_SERIES_LENGTH_TYPES]);
+
+const isSeriesLengthInput = (lengthType) => CLI_SERIES_LENGTH_TYPES.has(lengthType);
+const getSeriesLengthTypeForEpisodeCount = (episodeCount) =>
+  Number(episodeCount) >= 5 ? 'long_series' : 'short_series';
 
 const HELP_TEXT = `\
 Usage:
@@ -36,8 +43,8 @@ Options:
   --synopsis "..."           Story synopsis (required unless title provided)
   --synopsis-file "path"      Load synopsis from file
   --age "3-5|6-7|8-9"          Target age range (optional)
-  --length "short|medium|long|series|auto"
-  --episodes "N"              Force episode count when length is series
+  --length "short|medium|long|short_series|long_series|series|auto"
+  --episodes "N"              Force episode count when length is series-like
   --source "..."              Source/original story title
   --tags "tag1,tag2"          Comma-separated tags
   --model "gemini-3.1-pro-preview" Override model (default: ${DEFAULT_MODEL}). Prefix selects provider (gpt-*=OpenAI, gemini-*=Google).
@@ -229,7 +236,8 @@ const LENGTH_PROFILE = {
   short: { min: 700, max: 1100 },
   medium: { min: 1100, max: 1700 },
   long: { min: 1700, max: 2500 },
-  series: { min: 700, max: 1700 },
+  short_series: { min: 700, max: 1700 },
+  long_series: { min: 700, max: 1700 },
 };
 
 const getLengthTarget = (_ageRange, lengthType) => {
@@ -747,6 +755,8 @@ Rules:
 - If the original content is age-appropriate, retell it faithfully. You may condense or omit, but do NOT twist the ending or add new events/moral frames that are not in the original.
 - Avoid explicit moralizing statements in summaries and outlines; keep lessons implicit unless the original is explicitly didactic.
 - Preserve any core plot device or binding condition that drives the original story (e.g., a rule, vow, or restraint), using safe wording if needed.
+- If the user forces length=short_series, set format=\"series\" and keep episode_count within 3~4.
+- If the user forces length=long_series, set format=\"series\" and keep episode_count within 5~8.
 - If the user forces length=series or provides episode_count, set format=\"series\" and keep episode_count within 3~8 (adjust to range if needed).
 - If input length=auto, choose format/length_tier based on story scale and target age (large epics for age>=7 may be series; otherwise single).
 - If format is series, plan 3~8 episodes with clear cut points; include a gentle cliffhanger.
@@ -829,7 +839,7 @@ Output schema example:
 
 const planReviewPrompt = ({ plan, input, lengthTarget }) => {
   const ageProfile = getAgeProfile(plan?.target_age_range);
-  const lengthTargetScope = plan?.length_type === 'series' ? 'per_episode' : 'single_story';
+  const lengthTargetScope = plan?.format === 'series' ? 'per_episode' : 'single_story';
   const system = `You are a veteran Korean children's book editor and read-aloud specialist.
 
 [Purpose]
@@ -1369,6 +1379,9 @@ const normalizePlan = (plan, input) => {
   const normalized = { ...plan };
   const inputLength = input.length || 'auto';
   const forcedEpisodes = Number.isFinite(input.episodes) ? Number(input.episodes) : undefined;
+  const requestedSeriesLengthType = EXPLICIT_SERIES_LENGTH_TYPES.has(inputLength)
+    ? inputLength
+    : undefined;
 
   normalized.source_title = sanitizeLine(
     normalized.source_title || input.source || input.title || ''
@@ -1412,11 +1425,11 @@ const normalizePlan = (plan, input) => {
     normalized.coverage_scope = '';
   }
 
-  if (inputLength === 'series' || forcedEpisodes) {
+  if (isSeriesLengthInput(inputLength) || forcedEpisodes) {
     normalized.format = 'series';
     normalized.length_tier = 'series';
     normalized.episode_count = forcedEpisodes ?? normalized.episode_count;
-  } else if (['short', 'medium', 'long'].includes(inputLength)) {
+  } else if (SINGLE_LENGTH_TYPES.has(inputLength)) {
     normalized.format = 'single';
     normalized.length_tier = inputLength;
     normalized.episode_count = 1;
@@ -1427,19 +1440,22 @@ const normalizePlan = (plan, input) => {
       normalized.length_tier = 'series';
     } else {
       const tier = String(normalized.length_tier || '').toLowerCase();
-      normalized.length_tier = ['short', 'medium', 'long'].includes(tier) ? tier : 'short';
+      normalized.length_tier = SINGLE_LENGTH_TYPES.has(tier) ? tier : 'short';
     }
   }
 
   if (normalized.format === 'series') {
-    const episodeCount = Number(normalized.episode_count || 3);
-    normalized.episode_count = clamp(episodeCount, 3, 8);
+    const minEpisodeCount = requestedSeriesLengthType === 'long_series' ? 5 : 3;
+    const maxEpisodeCount = requestedSeriesLengthType === 'short_series' ? 4 : 8;
+    const defaultEpisodeCount = requestedSeriesLengthType === 'long_series' ? 5 : 3;
+    const episodeCount = Number(normalized.episode_count || defaultEpisodeCount);
+    normalized.episode_count = clamp(episodeCount, minEpisodeCount, maxEpisodeCount);
   } else {
     normalized.episode_count = 1;
   }
 
   normalized.length_type = normalized.format === 'series'
-    ? 'series'
+    ? getSeriesLengthTypeForEpisodeCount(normalized.episode_count)
     : normalized.length_tier || 'short';
 
   const episodeOutlines = Array.isArray(normalized.episode_outlines)
@@ -1527,7 +1543,7 @@ const StoryState = z.object({
 
 const SourceBasisEnum = z.enum(['known_story', 'user_synopsis', 'original']);
 const FormatEnum = z.enum(['single', 'series']);
-const LengthTierEnum = z.enum(['short', 'medium', 'long', 'series']);
+const LengthTierEnum = z.enum(['short', 'medium', 'long', 'series', 'short_series', 'long_series']);
 const AgeRangeEnum = z.enum(['3-5', '6-7', '8-9']);
 const IssueTypeEnum = z.enum([
   'structure',
@@ -1749,9 +1765,9 @@ const buildGraph = ({ planner, writer, reviewer }) => {
     const episodeCount = Number(state.plan?.episode_count || 0);
     const isSeries = format === 'series';
     if (state.input.length && state.input.length !== 'auto') {
-      if (state.input.length === 'series' && format !== 'series') {
+      if (isSeriesLengthInput(state.input.length) && format !== 'series') {
         normalizedReview.status = 'revise';
-        const detail = '사용자 입력 length=series 인데 format이 series가 아님.';
+        const detail = '사용자 입력 length가 series 계열인데 format이 series가 아님.';
         normalizedReview.must_fix = Array.isArray(normalizedReview.must_fix)
           ? [...normalizedReview.must_fix, detail]
           : [detail];
@@ -1760,7 +1776,7 @@ const buildGraph = ({ planner, writer, reviewer }) => {
           : [];
         normalizedReview.issues.push({ type: 'format', detail });
       }
-      if (['short', 'medium', 'long'].includes(state.input.length) && format !== 'single') {
+      if (SINGLE_LENGTH_TYPES.has(state.input.length) && format !== 'single') {
         normalizedReview.status = 'revise';
         const detail = '사용자 입력 length=short/medium/long 인데 format이 single이 아님.';
         normalizedReview.must_fix = Array.isArray(normalizedReview.must_fix)
@@ -1806,8 +1822,30 @@ const buildGraph = ({ planner, writer, reviewer }) => {
           : [];
         normalizedReview.issues.push({ type: 'structure', detail });
       }
+      if (state.input.length === 'short_series' && (episodeCount < 3 || episodeCount > 4)) {
+        normalizedReview.status = 'revise';
+        const detail = '사용자 입력 length=short_series 인 경우 회차 수는 3~4편이어야 함.';
+        normalizedReview.must_fix = Array.isArray(normalizedReview.must_fix)
+          ? [...normalizedReview.must_fix, detail]
+          : [detail];
+        normalizedReview.issues = Array.isArray(normalizedReview.issues)
+          ? normalizedReview.issues
+          : [];
+        normalizedReview.issues.push({ type: 'structure', detail });
+      }
+      if (state.input.length === 'long_series' && (episodeCount < 5 || episodeCount > 8)) {
+        normalizedReview.status = 'revise';
+        const detail = '사용자 입력 length=long_series 인 경우 회차 수는 5~8편이어야 함.';
+        normalizedReview.must_fix = Array.isArray(normalizedReview.must_fix)
+          ? [...normalizedReview.must_fix, detail]
+          : [detail];
+        normalizedReview.issues = Array.isArray(normalizedReview.issues)
+          ? normalizedReview.issues
+          : [];
+        normalizedReview.issues.push({ type: 'structure', detail });
+      }
     } else if (format === 'single') {
-      if (!['short', 'medium', 'long'].includes(lengthTier)) {
+      if (!SINGLE_LENGTH_TYPES.has(lengthTier)) {
         normalizedReview.status = 'revise';
         const detail = 'format=single인 경우 length_tier는 short/medium/long 중 하나여야 함.';
         normalizedReview.must_fix = Array.isArray(normalizedReview.must_fix)
@@ -2095,7 +2133,7 @@ const assembleMarkdown = ({
   ].filter(Boolean);
 
   let body = '';
-  if (plan.length_type === 'series') {
+  if (EXPLICIT_SERIES_LENGTH_TYPES.has(plan.length_type)) {
     body = drafts
       .map((draft, index) => {
         const episodeTime = Array.isArray(readTime?.per_episode_minutes)
@@ -2133,7 +2171,15 @@ const run = async () => {
     args.synopsis = fs.readFileSync(path.resolve(process.cwd(), args.synopsisFile), 'utf-8');
   }
 
-  const allowedLengths = new Set(['auto', 'short', 'medium', 'long', 'series']);
+  const allowedLengths = new Set([
+    'auto',
+    'short',
+    'medium',
+    'long',
+    'short_series',
+    'long_series',
+    'series',
+  ]);
   const allowedAges = new Set(['', '3-5', '6-7', '8-9']);
 
   if (!allowedLengths.has(args.length)) {

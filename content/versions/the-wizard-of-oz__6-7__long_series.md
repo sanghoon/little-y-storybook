@@ -4,14 +4,14 @@ story_id: "story_012"
 title: "오즈의 마법사"
 summary: "회오리바람에 휩쓸려 오즈의 나라에 온 도로시가 허수아비, 양철 나무꾼, 겁쟁이 사자와 함께 모험을 떠나는 이야기입니다. 서로를 도우며 위기를 극복하는 과정에서 친구들은 지혜와 사랑, 용기를 깨닫고 도로시는 집으로 돌아갈 방법을 찾게 됩니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-01-22T14:07:25.624Z"
 estimated_read_time: 37
 actual_char_count: 6176
 actual_word_count: 1867
 actual_sentence_count: 297
-generation_meta_path: "pipeline/meta/the-wizard-of-oz__6-7__series.json"
+generation_meta_path: "pipeline/meta/the-wizard-of-oz__6-7__long_series.json"
 tags: ["고전각색", "모험", "판타지", "우정", "성장", "용기", "지혜", "협동"]
 ---
 ### 1화

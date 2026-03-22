@@ -4,14 +4,14 @@ story_id: "story_011"
 title: "정글북"
 summary: "모글리, 발루, 바기라, 시어 칸 네 명의 핵심 인물을 중심으로 전개되는 이야기입니다. 모글리가 정글의 법칙을 배우고 용기를 내어 적을 물리친 뒤, 더 넓은 세상으로 나아가는 성장의 과정을 차분하고 감동적으로 그려냅니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-01-21T14:05:06.078Z"
 estimated_read_time: 27
 actual_char_count: 6800
 actual_word_count: 2050
 actual_sentence_count: 266
-generation_meta_path: "pipeline/meta/the-jungle-book__6-7__series.json"
+generation_meta_path: "pipeline/meta/the-jungle-book__6-7__long_series.json"
 tags: ["고전각색", "모험", "성장", "우정", "동물", "용기"]
 ---
 ### 1화

@@ -4,14 +4,14 @@ story_id: "story_029"
 title: "이상한 나라의 앨리스"
 summary: "나른한 오후, 앨리스는 말을 하는 시계 토끼를 쫓아 굴속으로 들어갑니다. 그곳에서 몸이 커졌다 작아지기도 하고, 웃는 고양이와 무서운 하트 여왕을 만나 신기한 모험을 합니다. 위기의 순간 꿈에서 깨어나 언니 곁으로 돌아오는 이야기입니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "short_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-01-29T13:44:27.658Z"
 estimated_read_time: 20
 actual_char_count: 4920
 actual_word_count: 1510
 actual_sentence_count: 228
-generation_meta_path: "pipeline/meta/alice-in-wonderland__6-7__series.json"
+generation_meta_path: "pipeline/meta/alice-in-wonderland__6-7__short_series.json"
 tags: ["고전각색", "판타지", "모험", "성장", "유머"]
 ---
 ### 1화

@@ -5,14 +5,14 @@ title: "라마야나"
 title_override: "라마와 라바나의 대결"
 summary: "라마가 바다에 돌다리를 놓아 랑카 섬으로 진격하고, 하누만의 도움을 받아 마왕 라바나와 최후의 대결을 펼쳐 시타를 구해내는 흥미진진한 모험 이야기입니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "short_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-02-09T13:28:38.702Z"
 estimated_read_time: 18
 actual_char_count: 3278
 actual_word_count: 1033
 actual_sentence_count: 134
-generation_meta_path: "pipeline/meta/ramayana-rama-vs-ravana__6-7__series.json"
+generation_meta_path: "pipeline/meta/ramayana-rama-vs-ravana__6-7__short_series.json"
 tags: ["신화", "모험", "용기", "마법", "협동"]
 ---
 ### 1화

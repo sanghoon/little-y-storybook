@@ -4,14 +4,14 @@ story_id: "story_031"
 title: "알라딘"
 summary: "가난한 소년 알라딘이 신비한 램프의 요정 지니를 만나 놀라운 모험을 시작합니다. 사악한 마법사의 방해로 램프와 공주를 잃어버리는 위기에 처하지만, 포기하지 않는 용기와 지혜로 마법사를 물리치고 소중한 것들을 되찾는 과정을 그립니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "short_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-01-29T14:00:58.321Z"
 estimated_read_time: 25
 actual_char_count: 5123
 actual_word_count: 1586
 actual_sentence_count: 220
-generation_meta_path: "pipeline/meta/aladdin__6-7__series.json"
+generation_meta_path: "pipeline/meta/aladdin__6-7__short_series.json"
 tags: ["전래동화", "모험", "마법", "지혜", "용기"]
 ---
 ### 1화

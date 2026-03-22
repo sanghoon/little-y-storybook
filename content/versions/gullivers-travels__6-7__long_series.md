@@ -4,14 +4,14 @@ story_id: "story_034"
 title: "걸리버 여행기"
 summary: "항해 중 폭풍우를 만나 낯선 섬에 도착한 걸리버는 손가락만큼 작은 사람들이 사는 릴리퍼트에서 거인이 되어 나라를 구합니다. 다시 떠난 여행에서는 집채만 한 거인들이 사는 브롭딩낵에 도착해 작은 인형처럼 지내며 아슬아슬한 모험을 합니다. 크고 작은 세상을 오가며 겪는 신비로운 경험과 가족의 품으로 돌아가기까지의 여정을 담았습니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-01-29T14:25:54.041Z"
 estimated_read_time: 43
 actual_char_count: 8218
 actual_word_count: 2568
 actual_sentence_count: 345
-generation_meta_path: "pipeline/meta/gullivers-travels__6-7__series.json"
+generation_meta_path: "pipeline/meta/gullivers-travels__6-7__long_series.json"
 tags: ["고전각색", "모험", "판타지", "귀향"]
 ---
 ### 1화

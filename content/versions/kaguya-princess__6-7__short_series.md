@@ -4,14 +4,14 @@ story_id: "story_038"
 title: "카구야 공주 이야기"
 summary: "대나무 숲에서 발견된 신비로운 아이가 노부부의 사랑 속에 아름다운 공주로 성장합니다. 수많은 구혼자들의 청혼을 물리치고 지상에 머물려 하지만, 결국 자신의 고향인 달나라로 돌아가게 되며 부모님과 애틋한 이별을 나누는 이야기입니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "short_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-02-09T13:06:32.412Z"
 estimated_read_time: 18
 actual_char_count: 4005
 actual_word_count: 1250
 actual_sentence_count: 145
-generation_meta_path: "pipeline/meta/kaguya-princess__6-7__series.json"
+generation_meta_path: "pipeline/meta/kaguya-princess__6-7__short_series.json"
 tags: ["전래동화", "판타지", "가족", "고전각색"]
 ---
 ### 1화

@@ -10,7 +10,7 @@
 필수 입력
 - title: 원전 제목
 - age_range: `3-5 | 6-7 | 8-9`
-- length: `short | medium | long | series`
+- length: `short | medium | long | short_series | long_series | series`
 
 옵션 입력
 - synopsis: 원전이 명확하지 않을 때만 참고 (없어도 진행)
@@ -20,7 +20,9 @@
 - short: 700–1100
 - medium: 1100–1700
 - long: 1700–2500
-- series: 회차당 700–1700
+- short_series: 회차당 700–1700, 총 3–4화
+- long_series: 회차당 700–1700, 총 5–8화
+- series: 회차당 700–1700, 총 3–8화 (하위 호환 alias)
 
 ### 연령 규칙 요약
 - 3–5세: 해피엔딩 필수, 의성어/의태어 강화
@@ -54,7 +56,9 @@
 필수 체크리스트
 - 원전을 알고 있다는 전제에서 **coverage_scope**를 한 줄로 지정.
 - length에 따라 **format/length_tier** 결정
-  - length=series → format=series, episode_count는 3–8 범위에서 자동 선택
+  - length=short_series → format=series, episode_count는 3–4 범위에서 자동 선택
+  - length=long_series → format=series, episode_count는 5–8 범위에서 자동 선택
+  - length=series → format=series, episode_count는 3–8 범위에서 자동 선택 (하위 호환 alias)
   - length=short/medium/long → format=single, episode_count=1
 - 원작이 연령에 적합하면 **사건/결말 유지**, 요약/생략만 허용
 - **새 사건/도덕적 결론 추가 금지**
@@ -207,7 +211,7 @@ story_id: "story_XXX"
 title: "..."
 summary: "..."
 age_range: "6-7"
-length_type: "series"
+length_type: "short_series"
 pipeline_version: "v3-gemini"
 estimated_read_time: 12
 actual_char_count: 4000

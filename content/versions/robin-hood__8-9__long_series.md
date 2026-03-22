@@ -4,14 +4,14 @@ story_id: "story_055"
 title: "로빈 후드"
 summary: "셔우드 숲에 머물며 욕심 많은 영주에게서 빼앗긴 재물을 되찾아 가난한 사람들에게 나누어 주는 의적 로빈 후드와 그의 든든한 친구 리틀 존의 활약상을 그린 모험 이야기."
 age_range: "8-9"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-02-28T17:30:31.599Z"
 estimated_read_time: 28
 actual_char_count: 6177
 actual_word_count: 1967
 actual_sentence_count: 182
-generation_meta_path: "pipeline/meta/robin-hood__8-9__series.json"
+generation_meta_path: "pipeline/meta/robin-hood__8-9__long_series.json"
 tags: ["고전각색", "모험", "우정", "용기", "나눔", "재치", "지혜"]
 ---
 ### 1화

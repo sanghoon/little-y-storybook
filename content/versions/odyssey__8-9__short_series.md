@@ -4,14 +4,14 @@ story_id: "story_045"
 title: "오딧세이아"
 summary: "트로이 전쟁이 끝난 후, 영웅 오디세우스는 고향으로 돌아가기 위해 10년 동안 거친 바다를 항해합니다. 외눈박이 거인, 마법을 부리는 마녀, 무시무시한 바다 괴물들의 위협을 지혜롭게 헤쳐 나갑니다. 마침내 고향 이타카에 도착한 오디세우스는 아들, 아내와 힘을 합쳐 위기에 빠진 왕국을 구하고 평화를 되찾습니다."
 age_range: "8-9"
-length_type: "series"
+length_type: "short_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-02-17T14:06:17.116Z"
 estimated_read_time: 30
 actual_char_count: 6789
 actual_word_count: 1944
 actual_sentence_count: 242
-generation_meta_path: "pipeline/meta/odyssey__8-9__series.json"
+generation_meta_path: "pipeline/meta/odyssey__8-9__short_series.json"
 tags: ["신화", "모험", "지혜", "가족", "귀향", "용기", "고전각색"]
 ---
 ### 1화

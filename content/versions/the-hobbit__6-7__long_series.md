@@ -4,14 +4,14 @@ story_id: "story_028"
 title: "호빗"
 summary: "겁 많은 호빗 빌보가 마법사 간달프, 난쟁이 대장 소린과 함께 무시무시한 용 스마우그에게 빼앗긴 보물을 되찾으러 떠나는 모험 이야기입니다. 빌보는 여행 도중 신비한 반지를 줍고 지혜를 발휘해 친구들을 구하며 진정한 용기를 배웁니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-02-16T07:24:55.223Z"
 estimated_read_time: 29
 actual_char_count: 6682
 actual_word_count: 2048
 actual_sentence_count: 314
-generation_meta_path: "pipeline/meta/the-hobbit__6-7__series.json"
+generation_meta_path: "pipeline/meta/the-hobbit__6-7__long_series.json"
 tags: ["고전각색", "판타지", "모험", "용기", "성장", "우정", "마법"]
 ---
 ### 1화

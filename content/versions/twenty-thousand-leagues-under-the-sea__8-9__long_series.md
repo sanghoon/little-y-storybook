@@ -4,14 +4,14 @@ story_id: "story_053"
 title: "해저 2만 리"
 summary: "바다의 괴물을 쫓던 아로낙스 박사 일행이 미스터리한 네모 선장의 거대한 잠수함 노틸러스호를 타고 신비롭고 경이로운 심해를 탐험하는 모험 이야기."
 age_range: "8-9"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-02-28T17:06:13.406Z"
 estimated_read_time: 25
 actual_char_count: 5578
 actual_word_count: 1665
 actual_sentence_count: 164
-generation_meta_path: "pipeline/meta/twenty-thousand-leagues-under-the-sea__8-9__series.json"
+generation_meta_path: "pipeline/meta/twenty-thousand-leagues-under-the-sea__8-9__long_series.json"
 tags: ["고전각색", "모험", "판타지", "동물", "용기", "협동"]
 ---
 ### 1화

@@ -4,14 +4,14 @@ story_id: "story_036"
 title: "신밧드의 모험"
 summary: "바그다드의 상인 신밧드가 항해 중 고래를 섬으로 착각해 표류하고, 거대한 로크 새와 다이아몬드 계곡을 거치며 겪는 신비한 모험과 지혜로운 탈출 이야기입니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "short_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-02-09T12:51:21.338Z"
 estimated_read_time: 10
 actual_char_count: 3784
 actual_word_count: 1172
 actual_sentence_count: 155
-generation_meta_path: "pipeline/meta/sinbad-adventure__6-7__series.json"
+generation_meta_path: "pipeline/meta/sinbad-adventure__6-7__short_series.json"
 tags: ["고전각색", "모험", "판타지", "지혜", "용기"]
 ---
 ### 1화

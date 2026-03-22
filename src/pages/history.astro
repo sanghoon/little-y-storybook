@@ -19,6 +19,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </section>
 
   <script is:inline>
+    const SERIES_LENGTH_TYPES = ['series', 'short_series', 'long_series'];
+    const LENGTH_TYPE_LABELS = {
+      short: '짧음',
+      medium: '보통',
+      long: '김',
+      series: '연작',
+      short_series: '짧은 연작',
+      long_series: '긴 연작',
+    };
+    const isSeriesLengthType = (lengthType) => SERIES_LENGTH_TYPES.includes(lengthType);
+    const getLengthTypeLabel = (lengthType) => LENGTH_TYPE_LABELS[lengthType] || lengthType;
+
     const historyContainer = document.querySelector('[data-history-list]');
     const emptyState = document.querySelector('[data-history-empty]');
 
@@ -40,22 +52,24 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       historyContainer.innerHTML = '';
       recent.slice(0, 10).forEach((item) => {
         const chapterHash =
-          item.length_type === 'series' && item.last_chapter_index
+          isSeriesLengthType(item.length_type) && item.last_chapter_index
             ? `#chapter-${item.last_chapter_index}`
             : '';
         const card = document.createElement('article');
         card.className = 'history-card';
         const lastReadAt = formatDate(item.last_read_at);
+        const isSeries = isSeriesLengthType(item.length_type);
+        const lengthLabel = getLengthTypeLabel(item.length_type);
         card.innerHTML = `
           <div class="history-main">
             <div class="history-title-row">
               <h3>${item.title}</h3>
-              <span class="history-type">${item.length_type === 'series' ? '연작' : '단편'}</span>
+              <span class="history-type">${isSeries ? '연작' : '단편'}</span>
             </div>
-            <p class="history-note">${item.length_type === 'series' ? `마지막으로 읽은 회차: ${item.last_chapter_index ?? 1}화` : '단편 이야기'}</p>
+            <p class="history-note">${isSeries ? `마지막으로 읽은 회차: ${item.last_chapter_index ?? 1}화` : '단편 이야기'}</p>
             <div class="history-meta">
               <span class="badge">${item.age_range}세</span>
-              <span class="badge">${item.length_type}</span>
+              <span class="badge">${lengthLabel}</span>
             </div>
           </div>
           <div class="history-actions">

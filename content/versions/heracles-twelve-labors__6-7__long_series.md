@@ -4,14 +4,14 @@ story_id: "story_042"
 title: "헤라클레스의 12과업"
 summary: "단단한 가죽을 가진 사자부터 지하 세계의 무서운 개까지 12가지 모험을 흥미진진하게 다룹니다. 잔혹한 묘사 대신 협동과 지혜를 강조하여 아이들이 영웅의 용기를 쉽게 배울 수 있습니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-02-09T13:42:58.046Z"
 estimated_read_time: 30
 actual_char_count: 6885
 actual_word_count: 2074
 actual_sentence_count: 252
-generation_meta_path: "pipeline/meta/heracles-twelve-labors__6-7__series.json"
+generation_meta_path: "pipeline/meta/heracles-twelve-labors__6-7__long_series.json"
 tags: ["신화", "모험", "용기", "지혜", "협동"]
 ---
 ### 1화

@@ -1,6 +1,11 @@
 ---
 import ReaderLayout from '../../layouts/ReaderLayout.astro';
-import { loadVersions, getRelatedVersions } from '../../lib/content';
+import {
+  getLengthTypeLabel,
+  getRelatedVersions,
+  isSeriesLengthType,
+  loadVersions,
+} from '../../lib/content';
 
 export function getStaticPaths() {
   const versions = loadVersions();
@@ -17,13 +22,23 @@ if (!version) {
 
 const related = getRelatedVersions(versions, version);
 const chapters = version.chapters ?? [];
-const isSeries = version.lengthType === 'series' && chapters.length > 0;
+const isSeries = isSeriesLengthType(version.lengthType) && chapters.length > 0;
 const seriesEstimated = isSeries
   ? chapters.reduce(
       (total, chapter) => total + (chapter.estimatedReadTime ?? 0),
       0
     ) || undefined
   : undefined;
+
+const formatUpdatedDate = (value: string): string => {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
 ---
 
 <ReaderLayout title={`${version.title} 읽기`} backHref="/stories">
@@ -32,9 +47,10 @@ const seriesEstimated = isSeries
       <p class="eyebrow">이야기 정보</p>
       <h1 class="reader-heading">{version.title}</h1>
       <p class="summary">{version.summary}</p>
+      <p class="card-date">업데이트 {formatUpdatedDate(version.updatedAt)}</p>
       <div class="meta">
         <span class="badge">{version.ageRange}세</span>
-        <span class="badge">{version.lengthType}</span>
+        <span class="badge">{getLengthTypeLabel(version.lengthType)}</span>
         {(seriesEstimated || version.estimatedReadTime) && (
           <span class="badge">
             예상 {seriesEstimated ?? version.estimatedReadTime}분
@@ -55,9 +71,11 @@ const seriesEstimated = isSeries
           <div class="related-links">
             {related.map((item) => (
               <a class="related-chip" href={`/read/${item.id}`}>
-                <span class="related-title">{item.ageRange}세 · {item.lengthType}</span>
+                <span class="related-title">
+                  {item.ageRange}세 · {getLengthTypeLabel(item.lengthType)}
+                </span>
                 <span class="badge">{item.ageRange}세</span>
-                <span class="badge">{item.lengthType}</span>
+                <span class="badge">{getLengthTypeLabel(item.lengthType)}</span>
               </a>
             ))}
           </div>

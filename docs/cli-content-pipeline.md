@@ -12,6 +12,10 @@
 - **format**: `single` 또는 `series`
 - **length_tier**: `short|medium|long` (format=single), `series` (format=series)
 - **episode_count**: format=single이면 1, format=series이면 3~8
+- **공개 length 입력값**: `short|medium|long|short_series|long_series|auto`
+  - `short_series`: 3~4화
+  - `long_series`: 5~8화
+  - 회차당 길이 타깃은 둘 다 동일하며, 차이는 주로 총 회차 수에 있습니다.
 
 ## 사전 준비
 - `.env`에 `OPENAI_API_KEY` (또는 프로젝트에서 쓰는 OpenAI 키) 설정
@@ -34,7 +38,7 @@ npm run generate:story -- \
 - `--story-title`: 버전 그룹핑용 스토리 표준 제목 (동일 제목 유지)
 - `--story-id`: 기존 `content/stories.yml`의 story id 재사용
 - `--age`: 대상 연령대 (예: `3-5`, `6-7`, `8-9`)
-- `--length`: `short|medium|long|series|auto`
+- `--length`: `short|medium|long|short_series|long_series|auto` (`series`는 하위 호환 alias)
 - `--episodes`: 연작 분량 강제 지정
 - `--source`: 원전 제목 (미지정 시 `title` 사용)
 - `--max-iterations`: Critic 재작성 루프 최대 횟수 (최대 2로 캡)
@@ -46,7 +50,7 @@ npm run generate:story -- \
 ## 결과 파일 형식
 `content/versions/<english-slug>__<age>__<length>.md` 형식으로 저장됩니다.
 스토리 인덱스는 자동으로 `content/stories.yml`에 반영됩니다.
-생성 과정 메타데이터는 `content/versions/meta/<english-slug>__<age>__<length>.json`에 저장됩니다.
+생성 과정 메타데이터는 `pipeline/meta/<english-slug>__<age>__<length>.json`에 저장됩니다.
 
 ```md
 ---
@@ -55,12 +59,12 @@ story_id: "story_011"
 title: "..."
 summary: "..."
 age_range: "6-7"
-length_type: "series"
+length_type: "short_series"
 estimated_read_time: 12
 actual_char_count: 1800
 actual_word_count: 420
 actual_sentence_count: 55
-generation_meta_path: "content/versions/meta/....json"
+generation_meta_path: "pipeline/meta/....json"
 tags: ["...", "..."]
 ---
 ### 1화

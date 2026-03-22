@@ -4,14 +4,14 @@ story_id: "story_026"
 title: "피노키오"
 summary: "제페토 할아버지가 만든 나무 인형 피노키오가 세상에 나와 겪는 모험과 성장 이야기입니다. 피노키오는 유혹에 빠져 거짓말을 하거나 당나귀가 되는 등 시련을 겪지만, 결국 아빠를 구하고 정직과 용기를 배워 진짜 사람이 됩니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-01-22T17:46:07.746Z"
 estimated_read_time: 36
 actual_char_count: 7518
 actual_word_count: 2255
 actual_sentence_count: 354
-generation_meta_path: "pipeline/meta/pinocchio__6-7__series.json"
+generation_meta_path: "pipeline/meta/pinocchio__6-7__long_series.json"
 tags: ["고전각색", "성장", "모험", "가족", "정직", "용기", "판타지"]
 ---
 ### 1화

@@ -4,14 +4,14 @@ story_id: "story_056"
 title: "하이디"
 summary: "알프스의 대자연 속에서 무뚝뚝한 할아버지와 살게 된 밝고 따뜻한 소녀 하이디가, 도시의 친구 클라라와 우정을 나누고 다시 고향으로 돌아와 모두에게 치유와 기적을 선물하는 이야기."
 age_range: "6-7"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-03-01T12:53:41.260Z"
 estimated_read_time: 23
 actual_char_count: 5004
 actual_word_count: 1564
 actual_sentence_count: 157
-generation_meta_path: "pipeline/meta/heidi__6-7__series.json"
+generation_meta_path: "pipeline/meta/heidi__6-7__long_series.json"
 tags: ["고전각색", "우정", "성장", "가족", "귀향", "편견극복"]
 ---
 ### 1화

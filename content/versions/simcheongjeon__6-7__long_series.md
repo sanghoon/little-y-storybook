@@ -4,14 +4,14 @@ story_id: "story_035"
 title: "심청전"
 summary: "앞 못 보는 아버지를 위해 공양미 삼백 석에 몸을 팔아 인당수에 빠진 효녀 심청의 이야기입니다. 심청은 바닷속 용궁에서 용왕님의 도움으로 연꽃이 되어 세상으로 돌아오고, 왕비가 되어 아버지를 다시 만나게 됩니다. 딸의 살아있음을 확인한 심 봉사는 기쁨에 눈을 뜨게 됩니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-01-29T14:36:20.286Z"
 estimated_read_time: 33
 actual_char_count: 5724
 actual_word_count: 1799
 actual_sentence_count: 246
-generation_meta_path: "pipeline/meta/simcheongjeon__6-7__series.json"
+generation_meta_path: "pipeline/meta/simcheongjeon__6-7__long_series.json"
 tags: ["전래동화", "고전각색", "가족", "희생", "보은", "용기", "마법"]
 ---
 ### 1화

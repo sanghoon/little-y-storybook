@@ -4,14 +4,14 @@ story_id: "story_040"
 title: "페르세우스와 메두사"
 summary: "페르세우스는 어머니를 괴롭히는 사악한 왕 폴리덱테스로부터 어머니를 지키기 위해, 눈을 마주치면 돌로 변하는 괴물 메두사의 머리를 가져오기로 맹세합니다. 지혜의 여신 아테나의 도움으로 신비한 무기들을 얻은 페르세우스는 메두사를 물리치고 왕을 벌하여 평화를 되찾습니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "short_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-02-09T13:20:53.676Z"
 estimated_read_time: 20
 actual_char_count: 3924
 actual_word_count: 1146
 actual_sentence_count: 145
-generation_meta_path: "pipeline/meta/perseus-and-medusa__6-7__series.json"
+generation_meta_path: "pipeline/meta/perseus-and-medusa__6-7__short_series.json"
 tags: ["신화", "모험", "용기", "가족"]
 ---
 ### 1화

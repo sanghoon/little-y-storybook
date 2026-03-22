@@ -4,14 +4,14 @@ story_id: "story_025"
 title: "피터팬"
 summary: "네버랜드의 환상적인 모험과 후크 선장과의 대결을 흥미진진하게 그리되, 웬디가 가족의 품으로 돌아와 성장하는 원작의 결말을 충실히 담았습니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-01-22T17:32:53.709Z"
 estimated_read_time: 32
 actual_char_count: 6504
 actual_word_count: 2004
 actual_sentence_count: 315
-generation_meta_path: "pipeline/meta/peter-pan__6-7__series.json"
+generation_meta_path: "pipeline/meta/peter-pan__6-7__long_series.json"
 tags: ["판타지", "모험", "성장", "가족", "마법", "용기"]
 ---
 ### 1화

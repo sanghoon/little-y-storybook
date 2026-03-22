@@ -4,14 +4,14 @@ story_id: "story_010"
 title: "서유기"
 summary: "오행산에 갇혀 있던 손오공이 삼장법사를 만나 풀려나고, 저팔계와 사오정을 동료로 맞이하여 서쪽 하늘로 모험을 떠납니다. 네 명의 일행은 백골 요괴의 속임수와 화염산의 뜨거운 불길 등 수많은 위험을 지혜와 협동으로 이겨냅니다. 마침내 서천에 도착하여 깨달음을 얻고 귀한 불경을 구해 돌아오는 대서사시입니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-01-21T14:20:44.059Z"
 estimated_read_time: 50
 actual_char_count: 9186
 actual_word_count: 2760
 actual_sentence_count: 408
-generation_meta_path: "pipeline/meta/journey-to-the-west__6-7__series.json"
+generation_meta_path: "pipeline/meta/journey-to-the-west__6-7__long_series.json"
 tags: ["고전각색", "모험", "판타지", "협동", "용기", "성장", "마법"]
 ---
 ### 1화

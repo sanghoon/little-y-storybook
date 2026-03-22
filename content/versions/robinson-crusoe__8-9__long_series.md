@@ -4,14 +4,14 @@ story_id: "story_044"
 title: "로빈슨 크루소"
 summary: "거친 파도에 휩쓸려 무인도에 홀로 남겨진 로빈슨 크루소는 절망하는 대신 스스로 집을 짓고 농사를 지으며 삶을 개척해 나갑니다. 낯선 발자국에 두려움을 느끼기도 하지만, 원주민 청년 프라이데이를 구해 진정한 우정을 나누며 28년 만에 그리운 고향으로 돌아가는 감동적인 모험을 그립니다."
 age_range: "8-9"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-02-17T13:55:42.774Z"
 estimated_read_time: 35
 actual_char_count: 5802
 actual_word_count: 1876
 actual_sentence_count: 220
-generation_meta_path: "pipeline/meta/robinson-crusoe__8-9__series.json"
+generation_meta_path: "pipeline/meta/robinson-crusoe__8-9__long_series.json"
 tags: ["고전각색", "모험", "성장", "용기", "우정", "지혜"]
 ---
 ### 1화

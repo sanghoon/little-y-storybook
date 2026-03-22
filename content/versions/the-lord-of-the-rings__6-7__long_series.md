@@ -4,14 +4,14 @@ story_id: "story_013"
 title: "반지의 제왕"
 summary: "6-7세 아이들을 위해 복잡한 전쟁 묘사를 줄이고 프로도와 샘의 우정에 초점을 맞춘 반지의 제왕 이야기입니다. 무서운 장면은 순화하고, 힘든 순간 서로 돕는 따뜻한 마음을 강조했습니다."
 age_range: "6-7"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-01-24T13:34:48.696Z"
 estimated_read_time: 35
 actual_char_count: 6309
 actual_word_count: 1945
 actual_sentence_count: 292
-generation_meta_path: "pipeline/meta/the-lord-of-the-rings__6-7__series.json"
+generation_meta_path: "pipeline/meta/the-lord-of-the-rings__6-7__long_series.json"
 tags: ["고전각색", "판타지", "모험", "우정", "용기", "마법"]
 ---
 ### 1화

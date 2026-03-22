@@ -4,14 +4,14 @@ story_id: "story_051"
 title: "톰 소여의 모험"
 summary: "장난꾸러기 소년 톰 소여와 자유로운 영혼의 단짝 허클베리 핀이 미시시피 강변의 작은 마을과 무인도, 어두운 동굴을 누비며 겪는 흥미진진한 모험과 진짜 보물찾기 이야기."
 age_range: "8-9"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-02-28T16:45:13.512Z"
 estimated_read_time: 28
 actual_char_count: 5676
 actual_word_count: 1802
 actual_sentence_count: 189
-generation_meta_path: "pipeline/meta/the-adventures-of-tom-sawyer__8-9__series.json"
+generation_meta_path: "pipeline/meta/the-adventures-of-tom-sawyer__8-9__long_series.json"
 tags: ["고전각색", "모험", "우정", "성장", "용기", "재치"]
 ---
 ### 1화

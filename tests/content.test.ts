@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { loadVersions, parseChapters } from '../src/lib/content';
+import {
+  isSeriesLengthType,
+  loadVersions,
+  parseChapters,
+} from '../src/lib/content';
 
 describe('content loader', () => {
   it('loads versions from markdown files', () => {
@@ -12,7 +16,7 @@ describe('content loader', () => {
 
   it('parses chapters for series content', () => {
     const versions = loadVersions();
-    const series = versions.find((version) => version.lengthType === 'series');
+    const series = versions.find((version) => isSeriesLengthType(version.lengthType));
     expect(series).toBeTruthy();
     if (!series) return;
 
@@ -35,5 +39,16 @@ describe('content loader', () => {
         (version) => typeof version.updatedAt === 'string' && Number.isFinite(version.updatedAtMs)
       )
     ).toBe(true);
+  });
+
+  it('uses split series length types', () => {
+    const versions = loadVersions();
+    const seriesTypes = new Set(
+      versions.filter((version) => isSeriesLengthType(version.lengthType)).map((version) => version.lengthType)
+    );
+
+    expect(seriesTypes.has('short_series')).toBe(true);
+    expect(seriesTypes.has('long_series')).toBe(true);
+    expect(seriesTypes.has('series')).toBe(false);
   });
 });

@@ -4,14 +4,14 @@ story_id: "story_049"
 title: "80일간의 세계일주"
 summary: "은행 강도로 오해받아 픽스 형사의 추적을 받으면서도, 인도에서 아우다를 구출하고 온갖 역경을 지혜롭게 헤쳐나가며 80일 만의 세계일주 내기에 도전하는 포그 일행의 여정."
 age_range: "8-9"
-length_type: "series"
+length_type: "long_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-02-28T16:13:23.599Z"
 estimated_read_time: 29
 actual_char_count: 6128
 actual_word_count: 1883
 actual_sentence_count: 197
-generation_meta_path: "pipeline/meta/around-the-world-in-80-days__8-9__series.json"
+generation_meta_path: "pipeline/meta/around-the-world-in-80-days__8-9__long_series.json"
 tags: ["고전각색", "모험", "우정", "용기", "지혜", "협동"]
 ---
 ### 1화

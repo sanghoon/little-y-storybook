@@ -19,7 +19,7 @@
 - id, story_id
 - title_override (optional)
 - age_range (예: 3-5)
-- length_type (short/medium/long/series)
+- length_type (short/medium/long/short_series/long_series)
 - pipeline_version (생성 파이프라인 버전, optional)
 - estimated_read_time (추정치, 분 단위)
 - audio_url (optional, TTS 오디오 파일 URL)
@@ -29,7 +29,7 @@
   - 필드: title, body, estimated_read_time, audio_url (optional)
 - tags (version-specific)
 - status (draft/published)
-  - 연작형(length_type = series)은 chapters 사용
+  - 연작형(length_type = short_series 또는 long_series)은 chapters 사용
 
 ## Tag 필드(예시)
 - id, name, type (age/length/theme/mood)
@@ -53,7 +53,7 @@
     {
       "id": "ver_002",
       "age_range": "8-9",
-      "length_type": "series",
+      "length_type": "short_series",
       "estimated_read_time": 12,
       "audio_url": "https://.../ver_002.mp3",
       "chapters": [
