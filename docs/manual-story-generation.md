@@ -10,11 +10,12 @@
 필수 입력
 - title: 원전 제목
 - age_range: `3-5 | 6-7 | 8-9`
-- length: `short | medium | long | short_series | long_series | series`
+- length: `short | medium | long | short_series | long_series`
 
 옵션 입력
 - synopsis: 원전이 명확하지 않을 때만 참고 (없어도 진행)
 - source_title: 원전 제목 (title과 동일하면 생략 가능)
+- legacy alias: `series` (하위 호환용. 가능하면 새 입력값으로는 사용하지 않음)
 
 ### 길이 타겟 (공백 제외 글자 수)
 - short: 700–1100
@@ -23,6 +24,11 @@
 - short_series: 회차당 700–1700, 총 3–4화
 - long_series: 회차당 700–1700, 총 5–8화
 - series: 회차당 700–1700, 총 3–8화 (하위 호환 alias)
+
+### length_tier 와 최종 length_type 관계
+- Planner JSON에서는 시리즈 입력이어도 `format=series`, `length_tier=series`를 사용한다.
+- 최종 Markdown frontmatter의 `length_type`은 회차 수 기준으로 `short_series` 또는 `long_series`를 사용한다.
+- `long_series`는 운영자 관점에서 “5화 이상이 자연스러운 이야기”를 뜻하지만, 실제 파이프라인 제약은 보통 5–8화다.
 
 ### 연령 규칙 요약
 - 3–5세: 해피엔딩 필수, 의성어/의태어 강화
@@ -56,8 +62,8 @@
 필수 체크리스트
 - 원전을 알고 있다는 전제에서 **coverage_scope**를 한 줄로 지정.
 - length에 따라 **format/length_tier** 결정
-  - length=short_series → format=series, episode_count는 3–4 범위에서 자동 선택
-  - length=long_series → format=series, episode_count는 5–8 범위에서 자동 선택
+  - length=short_series → format=series, length_tier=series, episode_count는 3–4 범위에서 자동 선택
+  - length=long_series → format=series, length_tier=series, episode_count는 5–8 범위에서 자동 선택
   - length=series → format=series, episode_count는 3–8 범위에서 자동 선택 (하위 호환 alias)
   - length=short/medium/long → format=single, episode_count=1
 - 원작이 연령에 적합하면 **사건/결말 유지**, 요약/생략만 허용
@@ -78,6 +84,7 @@
 - 모든 필드가 빠짐없이 채워져 있는가?
 - 시리즈라면 episode_outlines가 회차 수만큼 있는가?
 - length/format/episode_count가 일관적인가?
+- 시리즈라면 Planner의 `length_tier`는 `series`이고, 최종 frontmatter의 `length_type`은 `short_series` 또는 `long_series`로 매핑될 수 있음을 이해하고 있는가?
 
 필수 필드 체크리스트 (JSON 스키마 기준)
 ```json
@@ -181,6 +188,7 @@ Stage 2: JSON 출력
 ## 8) Final Packaging (Markdown)
 
 권장 메타데이터
+- `updated_at`은 리포 검증 기준상 필수이므로 `YYYY-MM-DD` 형식으로 반드시 채운다.
 - 자동 파이프라인과 동일하게 `estimated_read_time`, `actual_char_count`(공백 제외), `actual_word_count`, `actual_sentence_count`를 채운다.
 - 수동 생성이라 `generation_meta_path`는 없어도 된다(있다면 실제 경로만).
 
@@ -192,7 +200,8 @@ story_id: "story_XXX"
 title: "..."
 summary: "..."
 age_range: "6-7"
-length_type: "short|medium|long"
+length_type: "medium"
+updated_at: "2026-01-01"
 pipeline_version: "v3-gemini"
 estimated_read_time: 6
 actual_char_count: 1200
@@ -212,6 +221,7 @@ title: "..."
 summary: "..."
 age_range: "6-7"
 length_type: "short_series"
+updated_at: "2026-01-01"
 pipeline_version: "v3-gemini"
 estimated_read_time: 12
 actual_char_count: 4000

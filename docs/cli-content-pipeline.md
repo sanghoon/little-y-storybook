@@ -1,6 +1,6 @@
 # CLI 콘텐츠 생성 파이프라인
 
-정적 콘텐츠를 미리 생성하기 위한 CLI 파이프라인입니다. LangChain + LangGraph로 **Planner → Writer → Critic → Editor** 순서로 생성하고, 결과를 `content/versions/`에 저장합니다.
+정적 콘텐츠를 미리 생성하기 위한 CLI 파이프라인입니다. LangChain + LangGraph로 **Planner → Writer → Critic → Editor** 순서로 생성하고, 결과를 `content/versions/`에 저장합니다. 실행 엔트리는 `scripts/story-pipeline.mjs`이며, 일반적으로 `npm run generate:story -- ...` 형태로 사용합니다.
 
 ## 파이프라인 개요
 - **Planner**: 원전 범위/형식(format, length_tier) 결정 → 원작이 연령에 적합하면 사건/결말 유지(요약/생략만 허용) → 캐릭터 압축 → 씬/에피소드 설계
@@ -14,8 +14,9 @@
 - **episode_count**: format=single이면 1, format=series이면 3~8
 - **공개 length 입력값**: `short|medium|long|short_series|long_series|auto`
   - `short_series`: 3~4화
-  - `long_series`: 5~8화
+  - `long_series`: 외부 설명상 5화 이상, 실제 생성은 보통 5~8화
   - 회차당 길이 타깃은 둘 다 동일하며, 차이는 주로 총 회차 수에 있습니다.
+  - `series`는 하위 호환용 deprecated alias이며, 신규 입력값으로는 권장하지 않습니다.
 
 ## 사전 준비
 - `.env`에 `OPENAI_API_KEY` (또는 프로젝트에서 쓰는 OpenAI 키) 설정
@@ -38,14 +39,24 @@ npm run generate:story -- \
 - `--story-title`: 버전 그룹핑용 스토리 표준 제목 (동일 제목 유지)
 - `--story-id`: 기존 `content/stories.yml`의 story id 재사용
 - `--age`: 대상 연령대 (예: `3-5`, `6-7`, `8-9`)
-- `--length`: `short|medium|long|short_series|long_series|auto` (`series`는 하위 호환 alias)
-- `--episodes`: 연작 분량 강제 지정
+- `--length`: `short|medium|long|short_series|long_series|series|auto` (`series`는 deprecated alias)
+- `--episodes`: 연작 분량 강제 지정. `short_series`는 3~4화, `long_series`는 5~8화 범위로 자동 보정됩니다.
 - `--source`: 원전 제목 (미지정 시 `title` 사용)
 - `--max-iterations`: Critic 재작성 루프 최대 횟수 (최대 2로 캡)
 - `--plan-max-iterations`: 플랜 리뷰/수정 루프 최대 횟수 (기본 2)
 - `--output`: 저장 경로 직접 지정
 - `--print`: 결과를 stdout에 출력
 - `--dry-run`: 파일 저장 생략
+
+## 어떤 length를 넣어야 하나
+- `short`: 짧은 잠자리 읽기용 단편을 만들 때 사용합니다. 대략 3~5분, 공백 제외 700~1100자를 목표로 합니다.
+- `medium`: 한 번에 읽을 수 있지만 장면이 조금 더 필요한 단편에 적합합니다. 대략 6~10분, 공백 제외 1100~1700자를 목표로 합니다.
+- `long`: 단편 안에서 사건 전개가 더 많이 필요한 이야기일 때 사용합니다. 대략 11~20분, 공백 제외 1700~2500자를 목표로 합니다.
+- `short_series`: 이야기를 3~4개의 자연스러운 회차로 나누는 편이 좋을 때 사용합니다. 회차당 공백 제외 700~1700자를 목표로 합니다.
+- `long_series`: 5화 이상으로 나누는 편이 자연스러운 긴 이야기일 때 사용합니다. 실제 생성은 보통 5~8화로 맞춰지며, 회차당 공백 제외 700~1700자를 목표로 합니다.
+- `auto`: 스토리 규모와 연령대에 따라 파이프라인이 길이와 형식을 자동으로 선택합니다.
+
+`series`는 예전 입력값과의 호환을 위한 alias입니다. 새 문서나 운영 절차에서는 `short_series` 또는 `long_series`를 명시적으로 사용하는 것을 권장합니다.
 
 ## 결과 파일 형식
 `content/versions/<english-slug>__<age>__<length>.md` 형식으로 저장됩니다.
@@ -60,6 +71,7 @@ title: "..."
 summary: "..."
 age_range: "6-7"
 length_type: "short_series"
+updated_at: "2026-01-01"
 estimated_read_time: 12
 actual_char_count: 1800
 actual_word_count: 420
