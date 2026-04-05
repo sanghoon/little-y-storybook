@@ -8,7 +8,8 @@ const VERSIONS_DIR = path.join(CONTENT_DIR, 'versions');
 const STORIES_PATH = path.join(CONTENT_DIR, 'stories.yml');
 
 const ALLOWED_AGES = new Set(['3-5', '6-7', '8-9']);
-const ALLOWED_LENGTH = new Set(['short', 'medium', 'long', 'series']);
+const SERIES_LENGTH_TYPES = new Set(['short_series', 'long_series']);
+const ALLOWED_LENGTH = new Set(['short', 'medium', 'long', ...SERIES_LENGTH_TYPES]);
 const TAG_POOL = new Set([
   '고전각색',
   '전래동화',
@@ -159,7 +160,9 @@ versionFiles.forEach((name) => {
     }
   }
 
-  const match = name.match(/^(.+)__([0-9]-[0-9])__(short|medium|long|series)\.md$/);
+  const match = name.match(
+    /^(.+)__([0-9]-[0-9])__(short|medium|long|short_series|long_series)\.md$/
+  );
   if (!match) {
     report('warning', filePath, 'Filename does not match <slug>__<age>__<length>.md pattern.');
   } else {
@@ -183,7 +186,7 @@ versionFiles.forEach((name) => {
     });
   }
 
-  if (lengthType === 'series') {
+  if (SERIES_LENGTH_TYPES.has(lengthType)) {
     if (!/###\s*1화/.test(body)) {
       report('warning', filePath, 'Series story missing episode headings.');
     }

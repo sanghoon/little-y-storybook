@@ -1,6 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { loadVersions, getExcerpt } from '../lib/content';
+import {
+  getExcerpt,
+  getLengthTypeLabel,
+  isSeriesLengthType,
+  loadVersions,
+} from '../lib/content';
 
 const versions = loadVersions();
 const recommended = versions.slice(0, 6);
@@ -9,6 +14,8 @@ const recommendedPayload = versions.map((version) => ({
   title: version.title,
   ageRange: version.ageRange,
   lengthType: version.lengthType,
+  lengthLabel: getLengthTypeLabel(version.lengthType),
+  isSeries: isSeriesLengthType(version.lengthType),
   tags: version.tags,
   excerpt: getExcerpt(version, 90),
   chaptersCount: version.chapters?.length ?? 0,
@@ -57,14 +64,14 @@ const recommendedPayload = versions.map((version) => ({
         const visibleTags = version.tags.slice(0, 4);
         const hiddenTags = version.tags.slice(4);
         const chaptersCount = version.chapters?.length ?? 0;
-        const showChapters = version.lengthType === 'series' && chaptersCount > 0;
+        const showChapters = isSeriesLengthType(version.lengthType) && chaptersCount > 0;
         return (
           <article class="card">
             <h3>{version.title}</h3>
             <p>{getExcerpt(version, 90)}</p>
             <div class="meta">
               <span class="badge">{version.ageRange}세</span>
-              <span class="badge">{version.lengthType}</span>
+              <span class="badge">{getLengthTypeLabel(version.lengthType)}</span>
               {showChapters && <span class="badge">총 {chaptersCount}화</span>}
             </div>
             <div
@@ -115,11 +122,24 @@ const recommendedPayload = versions.map((version) => ({
       <a class="chip" href="/stories?length=short">짧음</a>
       <a class="chip" href="/stories?length=medium">보통</a>
       <a class="chip" href="/stories?length=long">김</a>
-      <a class="chip" href="/stories?length=series">연작</a>
+      <a class="chip" href="/stories?length=short_series">짧은 연작</a>
+      <a class="chip" href="/stories?length=long_series">긴 연작</a>
     </div>
   </section>
 
   <script is:inline>
+    const SERIES_LENGTH_TYPES = ['series', 'short_series', 'long_series'];
+    const LENGTH_TYPE_LABELS = {
+      short: '짧음',
+      medium: '보통',
+      long: '김',
+      series: '연작',
+      short_series: '짧은 연작',
+      long_series: '긴 연작',
+    };
+    const isSeriesLengthType = (lengthType) => SERIES_LENGTH_TYPES.includes(lengthType);
+    const getLengthTypeLabel = (lengthType) => LENGTH_TYPE_LABELS[lengthType] || lengthType;
+
     const recentContainer = document.querySelector('[data-recent-list]');
     const emptyState = document.querySelector('[data-recent-empty]');
 
@@ -130,18 +150,19 @@ const recommendedPayload = versions.map((version) => ({
       recentContainer.innerHTML = '';
       recent.slice(0, 1).forEach((item) => {
         const chapterHash =
-          item.length_type === 'series' && item.last_chapter_index
+          isSeriesLengthType(item.length_type) && item.last_chapter_index
             ? `#chapter-${item.last_chapter_index}`
             : '';
         const card = document.createElement('article');
         card.className = 'mini-card recent-card';
+        const lengthLabel = getLengthTypeLabel(item.length_type);
         card.innerHTML = `
           <div class="recent-info">
             <h3>${item.title}</h3>
-            <p>${item.length_type === 'series' ? `마지막으로 읽은 회차: ${item.last_chapter_index ?? 1}화` : '단편 이야기'}</p>
+            <p>${isSeriesLengthType(item.length_type) ? `마지막으로 읽은 회차: ${item.last_chapter_index ?? 1}화` : '단편 이야기'}</p>
             <div class="meta">
               <span class="badge">${item.age_range}세</span>
-              <span class="badge">${item.length_type}</span>
+              <span class="badge">${lengthLabel}</span>
             </div>
           </div>
           <a class="button" href="/read/${item.id}${chapterHash}">이어보기</a>
@@ -216,10 +237,10 @@ const recommendedPayload = versions.map((version) => ({
             age.textContent = `${version.ageRange}세`;
             const length = document.createElement('span');
             length.className = 'badge';
-            length.textContent = version.lengthType;
+            length.textContent = version.lengthLabel;
             meta.appendChild(age);
             meta.appendChild(length);
-            if (version.lengthType === 'series' && version.chaptersCount) {
+            if (version.isSeries && version.chaptersCount) {
               const chapters = document.createElement('span');
               chapters.className = 'badge';
               chapters.textContent = `총 ${version.chaptersCount}화`;

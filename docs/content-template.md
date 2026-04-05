@@ -6,13 +6,16 @@
 ```yaml
 ---
 id: ver_000
+story_id: story_000
 title: 제목
 summary: 한 줄 소개
 age_range: 3-5 / 6-7 / 8-9
-length_type: short / medium / long / series
+length_type: short / medium / long / short_series / long_series
 pipeline_version: v1
+updated_at: 2026-03-22T00:00:00.000Z
 estimated_read_time: 4
 audio_url: https://.../audio.mp3
+generation_meta_path: pipeline/meta/example__6-7__short.json
 tags: [선택 태그들]
 ---
 ```

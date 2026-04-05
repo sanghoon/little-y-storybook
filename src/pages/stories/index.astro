@@ -1,6 +1,11 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { loadVersions, getExcerpt } from '../../lib/content';
+import {
+  getExcerpt,
+  getLengthTypeLabel,
+  isSeriesLengthType,
+  loadVersions,
+} from '../../lib/content';
 
 const DEFAULT_SORT = 'updated-desc';
 type SortValue = 'updated-desc' | 'updated-asc' | 'title-asc' | 'title-desc';
@@ -48,13 +53,7 @@ const sortOptions = [
 
 const versions = sortVersions(loadVersions() as StoryVersion[], DEFAULT_SORT);
 const ages = ['3-5', '6-7', '8-9'];
-const lengths = ['short', 'medium', 'long', 'series'] as const;
-const lengthLabels: Record<(typeof lengths)[number], string> = {
-  short: '짧음',
-  medium: '보통',
-  long: '김',
-  series: '연작',
-};
+const lengths = ['short', 'medium', 'long', 'short_series', 'long_series'] as const;
 const tags = Array.from(
   new Set(versions.flatMap((version) => version.tags))
 ).slice(0, 12);
@@ -101,9 +100,9 @@ const tags = Array.from(
           class="chip"
           data-filter-value={length}
           type="button"
-          aria-label={`${lengthLabels[length]} 길이`}
+          aria-label={`${getLengthTypeLabel(length)} 길이`}
         >
-          {lengthLabels[length]}
+          {getLengthTypeLabel(length)}
         </button>
       ))}
     </div>
@@ -129,7 +128,7 @@ const tags = Array.from(
         const visibleTags = version.tags.slice(0, 4);
         const hiddenTags = version.tags.slice(4);
         const chaptersCount = version.chapters?.length ?? 0;
-        const showChapters = version.lengthType === 'series' && chaptersCount > 0;
+        const showChapters = isSeriesLengthType(version.lengthType) && chaptersCount > 0;
         return (
           <article
             class="card"
@@ -145,7 +144,7 @@ const tags = Array.from(
             <p class="card-date">업데이트 {formatUpdatedDate(version.updatedAt)}</p>
             <div class="meta">
               <span class="badge">{version.ageRange}세</span>
-              <span class="badge">{version.lengthType}</span>
+              <span class="badge">{getLengthTypeLabel(version.lengthType)}</span>
               {showChapters && <span class="badge">총 {chaptersCount}화</span>}
             </div>
             <div
@@ -184,8 +183,10 @@ const tags = Array.from(
   </section>
 
   <script is:inline>
+    const SERIES_LENGTH_TYPES = ['series', 'short_series', 'long_series'];
     const SORT_VALUES = ['updated-desc', 'updated-asc', 'title-asc', 'title-desc'];
     const DEFAULT_SORT = 'updated-desc';
+    const isSeriesLengthType = (length) => SERIES_LENGTH_TYPES.includes(length);
     const state = { age: '', length: '', tag: '', query: '', sort: DEFAULT_SORT };
     const countEl = document.querySelector('[data-count]');
     const emptyEl = document.querySelector('[data-empty]');
@@ -271,7 +272,8 @@ const tags = Array.from(
         const summary = card.dataset.summary || '';
 
         const matchAge = !state.age || age === state.age;
-        const matchLength = !state.length || length === state.length;
+        const matchLength = !state.length
+          || (state.length === 'series' ? isSeriesLengthType(length) : length === state.length);
         const matchTag = !state.tag || tags.includes(state.tag);
         const queryTarget = `${title} ${summary} ${tags}`.toLowerCase();
         const matchQuery =

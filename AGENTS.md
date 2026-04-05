@@ -21,7 +21,7 @@ Follow existing patterns and keep edits minimal and consistent.
 - Tests (single test by name): `npm test -- -t "parses chapters"`
 - Tests (filter by file + name): `npm test -- tests/content.test.ts -t "loads versions"`
 - Validate content: `npm run validate:content`
-- Generate story content: `npm run generate:story -- --title "..." --synopsis "..."`
+- Generate story content: `npm run generate:story -- --title "..." --synopsis "..." --length "short|medium|long|short_series|long_series|auto"`
 
 ## Linting / Formatting
 - No dedicated lint/format scripts exist in `package.json`.
@@ -68,8 +68,8 @@ Follow existing patterns and keep edits minimal and consistent.
 - One story version per file in `content/versions/`.
 - Filename pattern: `content/versions/<slug>__<age>__<length>.md`.
 - Frontmatter keys use snake_case (e.g., `estimated_read_time`).
-- `length_type` is one of: `short | medium | long | series`.
-- Required frontmatter: `id`, `story_id`, `title`, `summary`, `age_range`, `length_type`, `tags`.
+- `length_type` is one of: `short | medium | long | short_series | long_series`.
+- Required frontmatter: `id`, `story_id`, `title`, `summary`, `age_range`, `length_type`, `updated_at`, `tags`.
 - `age_range` must be one of: `3-5 | 6-7 | 8-9`.
 - Keep `summary` free of production metadata like "낭독용/버전/시리즈".
 - Series chapters use `### 1화` headings with optional `- estimated_read_time:` line.
@@ -80,7 +80,7 @@ Follow existing patterns and keep edits minimal and consistent.
 - Scripts live in `scripts/` and are ESM.
 - Use YAML for content metadata (`content/stories.yml`).
 - Validate content using `npm run validate:content`.
-- Story generation uses `npm run generate:story -- --title "..." --synopsis "..."`.
+- Story generation uses `npm run generate:story -- --title "..." --synopsis "..." --length "short|medium|long|short_series|long_series|auto"`.
 - Keep CLI help text aligned with the actual flags.
 - When adding new flags, update help text and validation in the same file.
 - Prefer explicit `Error` messages over silent fallbacks.

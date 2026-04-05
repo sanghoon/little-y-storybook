@@ -16,7 +16,7 @@ export type Version = {
   title: string;
   summary: string;
   ageRange: string;
-  lengthType: 'short' | 'medium' | 'long' | 'series' | string;
+  lengthType: 'short' | 'medium' | 'long' | 'short_series' | 'long_series' | string;
   updatedAt: string;
   updatedAtMs: number;
   estimatedReadTime?: number;
@@ -27,6 +27,17 @@ export type Version = {
   pipelineVersion?: string;
   slug: string;
 };
+
+export const SERIES_LENGTH_TYPES = ['short_series', 'long_series'] as const;
+
+export const LENGTH_TYPE_LABELS = {
+  short: '짧음',
+  medium: '보통',
+  long: '김',
+  series: '연작',
+  short_series: '짧은 연작',
+  long_series: '긴 연작',
+} as const satisfies Record<string, string>;
 
 const CONTENT_DIR = path.resolve(process.cwd(), 'content', 'versions');
 
@@ -75,6 +86,13 @@ const stripMarkdown = (markdown: string) =>
 
 const renderMarkdown = (markdown: string): string => String(marked.parse(markdown));
 
+export const isSeriesLengthType = (lengthType: string): boolean =>
+  lengthType === 'series'
+  || SERIES_LENGTH_TYPES.includes(lengthType as (typeof SERIES_LENGTH_TYPES)[number]);
+
+export const getLengthTypeLabel = (lengthType: string): string =>
+  LENGTH_TYPE_LABELS[lengthType as keyof typeof LENGTH_TYPE_LABELS] ?? lengthType;
+
 export const parseChapters = (markdown: string): Chapter[] => {
   const chunks = markdown.split(/^###\s+/m).filter(Boolean);
   return chunks.map((chunk, index) => {
@@ -122,7 +140,7 @@ export const loadVersions = (): Version[] => {
     const markdown = content.trim();
     const html = renderMarkdown(markdown);
     const lengthType = String(data.length_type ?? 'short');
-    const isSeries = lengthType === 'series';
+    const isSeries = isSeriesLengthType(lengthType);
     const pipelineVersion = toString(data.pipeline_version);
     const updatedAt = toIsoDateString(data.updated_at) ?? stat.mtime.toISOString();
     const updatedAtMs = new Date(updatedAt).getTime();

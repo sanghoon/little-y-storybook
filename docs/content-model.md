@@ -19,7 +19,8 @@
 - id, story_id
 - title_override (optional)
 - age_range (예: 3-5)
-- length_type (short/medium/long/series)
+- length_type (single: short/medium/long, series: short_series/long_series)
+- updated_at (예: 2026-01-01)
 - pipeline_version (생성 파이프라인 버전, optional)
 - estimated_read_time (추정치, 분 단위)
 - audio_url (optional, TTS 오디오 파일 URL)
@@ -29,7 +30,9 @@
   - 필드: title, body, estimated_read_time, audio_url (optional)
 - tags (version-specific)
 - status (draft/published)
-  - 연작형(length_type = series)은 chapters 사용
+  - 연작형(length_type = short_series 또는 long_series)은 chapters 사용
+
+길이 타입을 어떤 기준으로 선택할지는 이 문서가 아니라 CLI 가이드에서 설명한다. 운영자용 선택 기준은 [CLI 콘텐츠 생성 파이프라인](./cli-content-pipeline.md)을 따른다.
 
 ## Tag 필드(예시)
 - id, name, type (age/length/theme/mood)
@@ -47,13 +50,15 @@
       "id": "ver_001",
       "age_range": "3-5",
       "length_type": "short",
+      "updated_at": "2026-01-01",
       "estimated_read_time": 4,
       "audio_url": "https://.../ver_001.mp3"
     },
     {
       "id": "ver_002",
       "age_range": "8-9",
-      "length_type": "series",
+      "length_type": "short_series",
+      "updated_at": "2026-01-01",
       "estimated_read_time": 12,
       "audio_url": "https://.../ver_002.mp3",
       "chapters": [
