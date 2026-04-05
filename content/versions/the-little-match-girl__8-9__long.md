@@ -3,7 +3,7 @@ id: "ver_032_01"
 story_id: "story_032"
 title: "성냥팔이 소녀"
 summary: "섣달그믐 밤, 추위와 배고픔에 떨던 성냥팔이 소녀가 성냥을 하나씩 켜며 따뜻한 난로와 음식, 크리스마스트리의 환상을 봅니다. 마지막으로 그리운 할머니를 만난 소녀는 남은 성냥을 모두 태워 할머니와 함께 고통 없는 하늘나라로 떠납니다."
-age_range: "6-7"
+age_range: "8-9"
 length_type: "long"
 pipeline_version: "v3-gemini"
 updated_at: "2026-01-29T14:04:41.597Z"
@@ -11,7 +11,7 @@ estimated_read_time: 11
 actual_char_count: 2090
 actual_word_count: 678
 actual_sentence_count: 80
-generation_meta_path: "pipeline/meta/the-little-match-girl__6-7__long.json"
+generation_meta_path: "pipeline/meta/the-little-match-girl__8-9__long.json"
 tags: ["고전각색", "가족"]
 ---
 어느 몹시 춥고 눈이 펑펑 쏟아지는 섣달그믐 밤이었어요. 한 해의 마지막 날인 오늘, 온 세상은 하얀 눈으로 뒤덮였고 살을 에는 듯한 찬 바람이 쌩쌩 불어왔지요. 사람들은 두꺼운 외투를 입고 종종걸음으로 따뜻한 집을 향해 서둘러 걸어갔어요.

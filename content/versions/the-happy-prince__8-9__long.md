@@ -3,7 +3,7 @@ id: "ver_009_02"
 story_id: "story_009"
 title: "행복한 왕자"
 summary: "높은 탑 위에 서 있는 행복한 왕자 동상은 가난한 사람들을 보며 눈물 흘립니다. 남쪽으로 떠나려던 제비는 왕자의 부탁으로 몸에 박힌 보석과 황금을 가난한 이들에게 나누어 줍니다. 춥고 배고픈 겨울이 오자 제비는 왕자의 곁을 지키다 숨을 거두고, 왕자의 심장도 슬픔에 쪼개집니다. 사람들은 초라해진 동상을 버리지만, 천사는 세상에서 가장 소중한 두 가지로 왕자의 심장과 제비를 하늘로 데려갑니다."
-age_range: "6-7"
+age_range: "8-9"
 length_type: "long"
 pipeline_version: "v3-gemini"
 updated_at: "2026-01-24T11:55:36.860Z"
@@ -11,7 +11,7 @@ estimated_read_time: 13
 actual_char_count: 2348
 actual_word_count: 750
 actual_sentence_count: 97
-generation_meta_path: "pipeline/meta/the-happy-prince__6-7__long.json"
+generation_meta_path: "pipeline/meta/the-happy-prince__8-9__long.json"
 tags: ["고전각색", "나눔", "희생", "우정", "의인화"]
 ---
 높은 언덕 위, 도시가 한눈에 내려다보이는 곳에 ‘행복한 왕자’ 동상이 우뚝 서 있었어요. 왕자는 머리부터 발끝까지 번쩍이는 순금으로 덮여 있어 마치 태양처럼 빛났지요. 두 눈은 깊은 바다를 닮은 맑고 푸른 사파이어였고, 허리에 찬 칼자루에는 커다란 루비가 붉은 장미꽃처럼 이글거리고 있었답니다. 사람들은 그 아름다운 동상을 올려다보며 감탄하곤 했어요.
