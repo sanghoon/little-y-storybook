@@ -195,6 +195,23 @@ npm run generate:story -- \
 
 1회 재생성 후에도 같은 문제가 남으면 무한 재생성하지 않는다. 그 항목은 이번 커밋에서 제외하고, 필요한 경우 별도 작업으로 length 조정이나 coverage scope 재정의를 다시 논의한다.
 
+### 3.5 제외할 때는 stories.yml도 같이 정리한다
+
+생성물을 커밋에서 제외할 때는 Markdown 파일만 빼면 안 된다. `content/stories.yml`에 해당 story/version 참조가 남아 있으면 목록에는 보이지만 읽을 파일이 없는 깨진 콘텐츠가 된다.
+
+제외할 때 한 세트로 정리할 대상:
+- `content/versions/<slug>__<age>__<length>.md`
+- `content/stories.yml`의 해당 `story_###` 항목
+- 남기는 Markdown frontmatter의 `story_id`, `id`
+- 남기는 `content/stories.yml` 항목의 `id`, `versions`
+
+아직 커밋하지 않은 새 batch에서는 제외 대상을 `content/stories.yml`에서 제거하고, 남은 새 항목의 `story_###` / `ver_###_01`을 연속되게 재정렬한다. 이미 main에 들어간 기존 콘텐츠의 id는 재정렬하지 않는다.
+
+정리 후 반드시 확인한다.
+```bash
+npm run validate:content
+```
+
 ## 4. 리뷰 절차
 
 생성 완료 후 리뷰는 기계적 검증과 에이전트가 읽는 품질 검토를 분리한다.
@@ -324,7 +341,7 @@ npm run build
 - 안전 완화 과정에서 이야기의 갈등/대가/성장이 사라진 경우
 - `long` 또는 `series`로 잡았는데 실제 본문이 핵심 전개를 담지 못할 만큼 얇은 경우
 
-재생성은 기존 id를 보존해야 하므로 `--story-id`와 `--overwrite`를 사용한다. 재생성 프롬프트에는 빠진 핵심 사건을 `--synopsis`로 명시한다. 1회 재생성 후에도 같은 문제가 남으면 무한 재생성하지 않고 이번 커밋에서 제외한다.
+재생성은 기존 id를 보존해야 하므로 `--story-id`와 `--overwrite`를 사용한다. 재생성 프롬프트에는 빠진 핵심 사건을 `--synopsis`로 명시한다. 1회 재생성 후에도 같은 문제가 남으면 무한 재생성하지 않고 이번 커밋에서 제외한다. 제외할 때는 Markdown 파일뿐 아니라 `content/stories.yml`의 해당 story/version 참조도 같이 제거한다.
 
 커밋에서 제외한 항목은 별도 작업에서 다시 다룬다.
 - length를 올린다.
@@ -368,6 +385,7 @@ npm run build
 - 새 콘텐츠가 모두 의도한 모델로 생성됐는지 확인했다.
 - 직접 수정한 파일은 오타/문장부호/메타데이터 수준에 머물렀다.
 - 원전 핵심 누락 항목은 1회 재생성했고, 그래도 불만족스러운 항목은 이번 커밋에서 제외했다.
+- 제외한 항목은 `content/stories.yml`에서도 제거했고, 남은 새 항목의 `story_id` / version id / `versions` 참조를 일관되게 맞췄다.
 - `npm run validate:content`가 통과했다.
 - `npm test`가 통과했다.
 - `npm run build`가 통과했다.
