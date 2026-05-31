@@ -1,13 +1,13 @@
 ---
-id: "ver_098_01"
-story_id: "story_098"
+id: "ver_094_01"
+story_id: "story_094"
 title: "잔 다르크"
 summary: "평화로운 시골 마을의 소녀 잔 다르크가 나라를 구하라는 신비한 목소리를 듣고 용기를 내어 길을 나선다. 자신감을 잃은 샤를 왕세자를 설득해 하얀 깃발을 들고 오를레앙 전투를 승리로 이끌며, 마침내 왕세자를 진짜 왕으로 즉위시킨다. 이후 적군에게 사로잡히지만 끝까지 굳은 신념을 지키며 숭고하게 희생하여 프랑스의 영원한 희망과 용기의 상징으로 거듭나는 이야기."
 age_range: "8-9"
 length_type: "short_series"
 pipeline_version: "v3-gemini"
 updated_at: "2026-05-31T08:46:06.939Z"
-estimated_read_time: 18
+estimated_read_time: 20
 actual_char_count: 4041
 actual_word_count: 1275
 actual_sentence_count: 122
