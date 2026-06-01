@@ -11,6 +11,7 @@
 - `docs/roadmap.md` : 단계별 로드맵
 - `docs/content-samples.md` : MVP 콘텐츠 샘플 목록
 - `docs/content-template.md` : 콘텐츠 작성 템플릿
+- `docs/story-generation-runbook.md` : 대량 스토리 생성, 검토, 수정 대응 절차
 - `docs/screens/home.md` : 홈 화면 스펙
 - `docs/screens/list.md` : 리스트/탐색 화면 스펙
 - `docs/screens/detail.md` : 이야기 상세 화면 스펙
